@@ -1,3 +1,4 @@
+from plotly.colors import n_colors
 import streamlit as st
 import pandas as pd
 import io
@@ -502,7 +503,7 @@ if doencas_selecionadas:
     """, unsafe_allow_html=True)
     AgGrid(df_resumo_aggrid, gridOptions=gb.build(), height=400,
            custom_css=custom_css, use_container_width=True)
-    # Legenda das siglas (acima do botão de exportar)
+    # Legenda das siglas
     st.markdown(
         """
         <div style='margin-top: 12px; font-size: 1em; color: #444;'>
@@ -579,3 +580,82 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.plotly_chart(fig, use_container_width=True)
+
+# =========================
+# Curva de Sobrevivência — Grãos Ardidos (%)
+# =========================
+st.markdown(
+    """
+    <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+        Curva de Sobrevivência — Grãos Ardidos (%)
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+df_surv_ardidos = df_analise_sanidade[["nome", "graosArdidos"]].dropna()
+hibridos_ardidos = df_surv_ardidos["nome"].unique()
+fig_surv_ardidos = go.Figure()
+area_dict_ardidos = {}
+
+for h in hibridos_ardidos:
+    dados = df_surv_ardidos[df_surv_ardidos["nome"]
+                            == h]["graosArdidos"].sort_values().values
+    if len(dados) < 2:
+        continue
+    valores = np.unique(dados)
+    y_surv = [(dados >= v).sum() / len(dados) for v in valores]
+    fig_surv_ardidos.add_trace(go.Scatter(
+        x=valores,
+        y=y_surv,
+        mode="lines+markers",
+        name=h
+    ))
+    area = np.trapz(y_surv, valores)
+    area_dict_ardidos[h] = area
+
+# Linha de referência 6% (padrão para grãos ardidos)
+ref = 6
+label = "Referência Grãos Ardidos (6%)"
+fig_surv_ardidos.add_vline(
+    x=ref, line_width=2, line_dash="solid", line_color="black")
+fig_surv_ardidos.add_annotation(x=ref, y=1.02, text=label, showarrow=False, yanchor="bottom",
+                                xanchor="right", xshift=-5, textangle=-90, font=dict(color="black", size=12))
+
+# Legenda de área sob a curva
+area_df_ardidos = pd.DataFrame(list(
+    area_dict_ardidos.items()), columns=pd.Index(["Híbrido", "Área sob a curva"]))
+area_df_ardidos = area_df_ardidos.sort_values(
+    "Área sob a curva", ascending=False)
+n_ardidos = len(area_df_ardidos)
+if n_ardidos > 1:
+    cores_ardidos = n_colors(
+        'rgb(200,255,200)', 'rgb(255,200,200)', n_ardidos, colortype='rgb')
+else:
+    cores_ardidos = ['rgb(200,255,200)']
+area_df_ardidos["Cor"] = cores_ardidos
+fig_surv_ardidos.add_trace(go.Table(
+    header=dict(values=["<b>Híbrido</b>", "<b>Área sob a curva</b>"],
+                fill_color="#f5f7fa", font=dict(color="black", size=13)),
+    cells=dict(values=[area_df_ardidos["Híbrido"], [f"{v:.3f}" for v in area_df_ardidos["Área sob a curva"]]], fill_color=[
+               area_df_ardidos["Cor"].tolist()], font=dict(color="black", size=13)),
+    domain=dict(x=[0.7, 1], y=[0.6, 1])
+))
+
+fig_surv_ardidos.update_layout(
+    title="Curva de Sobrevivência — Grãos Ardidos (%)",
+    xaxis_title="Grãos Ardidos (%)",
+    yaxis_title="Sobrevivência (%)",
+    font=dict(size=15, color='black'),
+    legend_title_text="Híbrido",
+    legend_title_font=dict(size=15, color='black'),
+    legend=dict(font=dict(color='black')),
+    xaxis=dict(tickfont=dict(color='black'), title_font=dict(
+        size=18, color='black'), color='black'),
+    yaxis=dict(tickformat=".0%", tickfont=dict(color='black'), title_font=dict(
+        size=18, color='black'), color='black'),
+    height=650,
+    margin=dict(t=60, b=80, l=40, r=40),
+    plot_bgcolor="#f5f7fa"
+)
+st.plotly_chart(fig_surv_ardidos, use_container_width=True)

@@ -702,100 +702,144 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
     if 'fazendaRef' in df_frequencia_visualizacao.columns:
         df_frequencia_visualizacao = df_frequencia_visualizacao.drop(columns=[
                                                                      'fazendaRef'])
-    from st_aggrid import AgGrid, GridOptionsBuilder
-    # Exibe a tabela de Frequência de Resposta diretamente, sem expander
-    st.markdown(
-        """
-        <div style="
-            background-color: #e7f0fa;
-            border-left: 6px solid #0070C0;
-            padding: 12px 18px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            font-size: 1.15em;
-            color: #22223b;
-            font-weight: 600;
-        ">
-            Tabela de Frequência de Resposta por Híbrido e Local
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.empty:
-        gb_freq = GridOptionsBuilder.from_dataframe(df_frequencia_visualizacao)
-        # Configuração de casas decimais para colunas numéricas
-        colunas_formatar_freq = {
-            'Prod@13.5% (sc/ha)': 1,
-            'Prod_max_fazenda': 1,
-            'Diferença p/ Máx': 1,
-            'Prod Rel (%)': 1
-        }
-        for col in df_frequencia_visualizacao.columns:
-            if col in colunas_formatar_freq:
-                casas = colunas_formatar_freq[col]
-                gb_freq.configure_column(
-                    col,
-                    headerClass='ag-header-bold',
-                    menuTabs=['generalMenuTab',
-                              'filterMenuTab', 'columnsMenuTab'],
-                    valueFormatter=f"value != null ? value.toFixed({casas}) : ''"
-                )
-            else:
-                gb_freq.configure_column(
-                    col,
-                    headerClass='ag-header-bold',
-                    menuTabs=['generalMenuTab',
-                              'filterMenuTab', 'columnsMenuTab']
-                )
-        gb_freq.configure_default_column(
-            editable=False, groupable=True, filter=True, resizable=True, cellStyle={'fontSize': '12px'})
-        gb_freq.configure_grid_options(headerHeight=30)
-        custom_css_freq = {
-            ".ag-header-cell-label": {
-                "font-weight": "bold",
-                "font-size": "12px",
-                "color": "black"
-            },
-            ".ag-cell": {
-                "color": "black",
-                "font-size": "12px"
-            }
-        }
-        grid_options_freq = gb_freq.build()
-        # Garante que é DataFrame para o AgGrid
-        if isinstance(df_frequencia_visualizacao, pd.Series):
-            df_frequencia_visualizacao = df_frequencia_visualizacao.to_frame().T
-        AgGrid(
-            df_frequencia_visualizacao,
-            gridOptions=grid_options_freq,
-            enable_enterprise_modules=True,
-            fit_columns_on_grid_load=False,
-            theme="streamlit",
-            height=500,
-            reload_data=True,
-            custom_css=custom_css_freq
-        )
-        # Botão para exportar o grid
-        buffer_freq_vis = io.BytesIO()
-        # O uso de BytesIO com pd.ExcelWriter é suportado em tempo de execução, mas pode gerar falso positivo no linter.
-        # type: ignore
-        with pd.ExcelWriter(buffer_freq_vis, engine='xlsxwriter') as writer:  # type: ignore
-            df_frequencia_visualizacao.to_excel(writer, index=False)
-        buffer_freq_vis.seek(0)
-        st.download_button(
-            label='⬇️ Baixar Excel (Tabela Frequência Visualização)',
-            data=buffer_freq_vis,
-            file_name='frequencia_visualizacao.xlsx',
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
-    else:
-        st.info(
-            "Nenhum dado disponível para exibir na tabela. Ajuste os filtros ou carregue os dados.")
 
-# Ajusta casas decimais para 1 nas colunas relevantes
-colunas_1_casa = [
-    'Prod@13.5% (sc/ha)', 'Prod_max_fazenda', 'Diferença p/ Máx', 'Prod Rel (%)']
-for col in colunas_1_casa:
-    if col in df_frequencia.columns:
-        df_frequencia[col] = pd.Series(pd.to_numeric(
-            df_frequencia[col], errors='coerce')).round(1)
+# (após todos os gráficos e heatmaps)
+
+st.markdown(
+    """
+    <div style="
+        background-color: #e7f0fa;
+        border-left: 6px solid #0070C0;
+        padding: 12px 18px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        font-size: 1.15em;
+        color: #22223b;
+        font-weight: 600;
+    ">
+        Tabela de Frequência de Resposta por Híbrido e Local
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.empty:
+    gb_freq = GridOptionsBuilder.from_dataframe(df_frequencia_visualizacao)
+    colunas_formatar_freq = {
+        'Prod@13.5% (sc/ha)': 1,
+        'Prod_max_fazenda': 1,
+        'Diferença p/ Máx': 1,
+        'Prod Rel (%)': 1
+    }
+    for col in df_frequencia_visualizacao.columns:
+        if col in colunas_formatar_freq:
+            casas = colunas_formatar_freq[col]
+            gb_freq.configure_column(
+                col,
+                headerClass='ag-header-bold',
+                menuTabs=['generalMenuTab', 'filterMenuTab', 'columnsMenuTab'],
+                valueFormatter=f"value != null ? value.toFixed({casas}) : ''"
+            )
+        else:
+            gb_freq.configure_column(
+                col,
+                headerClass='ag-header-bold',
+                menuTabs=['generalMenuTab', 'filterMenuTab', 'columnsMenuTab']
+            )
+    gb_freq.configure_default_column(
+        editable=False, groupable=True, filter=True, resizable=True, cellStyle={'fontSize': '12px'})
+    gb_freq.configure_grid_options(headerHeight=30)
+    custom_css_freq = {
+        ".ag-header-cell-label": {
+            "font-weight": "bold",
+            "font-size": "12px",
+            "color": "black"
+        },
+        ".ag-cell": {
+            "color": "black",
+            "font-size": "12px"
+        }
+    }
+    grid_options_freq = gb_freq.build()
+    if isinstance(df_frequencia_visualizacao, pd.Series):
+        df_frequencia_visualizacao = df_frequencia_visualizacao.to_frame().T
+    AgGrid(
+        df_frequencia_visualizacao,
+        gridOptions=grid_options_freq,
+        enable_enterprise_modules=True,
+        fit_columns_on_grid_load=False,
+        theme="streamlit",
+        height=500,
+        reload_data=True,
+        custom_css=custom_css_freq
+    )
+    buffer_freq_vis = io.BytesIO()
+    # O uso de BytesIO com pd.ExcelWriter é suportado em tempo de execução, mas pode gerar falso positivo no linter.
+    # type: ignore
+    with pd.ExcelWriter(buffer_freq_vis, engine='xlsxwriter') as writer:  # type: ignore
+        df_frequencia_visualizacao.to_excel(writer, index=False)
+    buffer_freq_vis.seek(0)
+    st.download_button(
+        label='⬇️ Baixar Excel (Tabela Frequência Visualização)',
+        data=buffer_freq_vis,
+        file_name='frequencia_visualizacao.xlsx',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+else:
+    st.info("Nenhum dado disponível para exibir na tabela. Ajuste os filtros ou carregue os dados.")
+
+# Exibe o heatmap de Ranking APÓS a tabela AgGrid
+if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Híbrido', 'Fazenda', 'Ranking']):
+    st.markdown("""
+    <div style="
+        background-color: #e7f0fa;
+        border-left: 6px solid #0070C0;
+        padding: 12px 18px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        font-size: 1.15em;
+        color: #22223b;
+        font-weight: 600;
+    ">
+        Mapa de Ranking dos Híbridos nos Diferentes Locais
+    </div>
+    """, unsafe_allow_html=True)
+    df_heatmap_ranking = df_frequencia.pivot_table(
+        index='Fazenda', columns='Híbrido', values='Ranking', aggfunc='mean'
+    )
+    escala_de_cores = [
+        (0.00, "forestgreen"),
+        (0.25, "green"),
+        (0.50, "mediumseagreen"),
+        (0.75, "lightgreen"),
+        (1.00, "honeydew")
+    ]
+    import plotly.express as px
+    fig_ranking = px.imshow(
+        df_heatmap_ranking,
+        labels=dict(x="Híbrido", y="Fazenda", color="Ranking"),
+        color_continuous_scale=escala_de_cores,
+        aspect='auto',
+        text_auto=True,
+        zmin=1,
+        zmax=21
+    )
+    fig_ranking.data[0].hovertemplate = (
+        'Fazenda: %{y}<br>Híbrido: %{x}<br>'
+        'Ranking: %{z:.1f}<extra></extra>'
+    )
+    fig_ranking.update_layout(
+        xaxis_title="Híbrido",
+        yaxis_title="Fazenda",
+        margin=dict(l=40, r=40, t=40, b=40),
+        height=500,
+        font=dict(size=20, color='black'),
+        xaxis=dict(title_font=dict(size=22, color='black'),
+                   tickfont=dict(size=18, color='black')),
+        yaxis=dict(title_font=dict(size=22, color='black'),
+                   tickfont=dict(size=18, color='black')),
+        coloraxis_colorbar=dict(title_font=dict(
+            size=20, color='black'), tickfont=dict(size=18, color='black')),
+    )
+    fig_ranking.update_traces(textfont=dict(
+        size=18, color="black", family="Arial Black, Arial, sans-serif"))
+    st.plotly_chart(fig_ranking, use_container_width=True)

@@ -1,3 +1,4 @@
+from st_aggrid import GridOptionsBuilder
 import streamlit as st
 import pandas as pd
 import io
@@ -417,6 +418,82 @@ st.download_button(
     data=buffer_agrupado_vis,
     file_name="conjunta_producao.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
+# =========================
+# Resumo por Híbrido (nome) - após agrupado
+# =========================
+st.markdown(
+    """
+    <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+        Conjunta de Produção por Híbrido
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# Seleciona colunas numéricas principais para o resumo
+colunas_resumo = [
+    'humidade', 'prod_kg_ha_corr', 'prod_sc_ha_corr', 'numPlantas_ha', 'media_AIE_m', 'media_ALT_m',
+    'media_umd_PMG', 'corr_PMG', 'media_NumFileiras', 'media_NumGraosPorFileira',
+    'graosArdidos', 'perc_Total', 'ciclo_dias'
+]
+colunas_resumo_existentes = [
+    c for c in colunas_resumo if c in df_analise_conjunta.columns]
+df_resumo_hibrido = df_analise_conjunta.groupby(
+    'nome')[colunas_resumo_existentes].mean().reset_index()
+# Renomeia colunas para visualização
+renomear_resumo = {
+    'nome': 'Híbrido',
+    'humidade': 'Umd (%)',
+    'prod_kg_ha_corr': 'Prod@13.5% (kg/ha)',
+    'prod_sc_ha_corr': 'Prod@13.5% (sc/ha)',
+    'numPlantas_ha': 'Pop (plantas/ha)',
+    'media_AIE_m': 'AIE (m)',
+    'media_ALT_m': 'ALT (m)',
+    'media_umd_PMG': 'PMG Umd (%)',
+    'corr_PMG': 'PMG@13.5% (g)',
+    'media_NumFileiras': 'Num Fileiras',
+    'media_NumGraosPorFileira': 'Num Grãos/Fileira',
+    'graosArdidos': 'Ardidos (%)',
+    'perc_Total': 'Perda Total (%)',
+    'ciclo_dias': 'Ciclo (dias)'
+}
+df_resumo_hibrido = df_resumo_hibrido.rename(columns=renomear_resumo)
+# Configura AgGrid
+_gb_resumo_hibrido = GridOptionsBuilder.from_dataframe(df_resumo_hibrido)
+colunas_formatar_resumo = {
+    'Prod@13.5% (kg/ha)': 1,
+    'Prod@13.5% (sc/ha)': 1,
+    'Pop (plantas/ha)': 0,
+    'Umd (%)': 1,
+    'AIE (m)': 2,
+    'ALT (m)': 2,
+    'PMG Umd (%)': 1,
+    'PMG@13.5% (g)': 1,
+    'Num Fileiras': 1,
+    'Num Grãos/Fileira': 0,
+    'Ardidos (%)': 1,
+    'Perda Total (%)': 1,
+    'Ciclo (dias)': 0
+}
+for col in df_resumo_hibrido.columns:
+    if col in colunas_formatar_resumo:
+        casas = colunas_formatar_resumo[col]
+        _gb_resumo_hibrido.configure_column(
+            col, valueFormatter=f"value != null ? value.toFixed({casas}) : ''", headerClass='ag-header-bold')
+_gb_resumo_hibrido.configure_default_column(
+    editable=False, groupable=True, filter=True, resizable=True, cellStyle={'fontSize': '12px'})
+_gb_resumo_hibrido.configure_grid_options(headerHeight=30)
+_grid_options_resumo_hibrido = _gb_resumo_hibrido.build()
+AgGrid(
+    df_resumo_hibrido,
+    gridOptions=_grid_options_resumo_hibrido,
+    enable_enterprise_modules=True,
+    fit_columns_on_grid_load=False,
+    theme="streamlit",
+    height=500,
+    reload_data=True,
+    custom_css=custom_css
 )
 
 # =========================
