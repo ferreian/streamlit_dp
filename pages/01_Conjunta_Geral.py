@@ -471,7 +471,7 @@ st.markdown(
         color: #22223b;
         font-weight: 600;
     ">
-        Análise Conjunta da Produção e Componentes de Produção - por local
+        Análise Conjunta da Produção e Componentes de Produção
     </div>
     """,
     unsafe_allow_html=True
