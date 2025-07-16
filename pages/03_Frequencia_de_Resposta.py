@@ -587,14 +587,25 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
             title='Frequência de Rankings por Híbrido'
         )
         fig_freq.update_layout(
-            xaxis=dict(type='category'),
-            font=dict(size=16),
+            xaxis=dict(type='category', title_font=dict(
+                size=20, color='black'), tickfont=dict(size=18, color='black')),
+            yaxis=dict(title_font=dict(size=20, color='black'),
+                       tickfont=dict(size=18, color='black')),
+            font=dict(size=18, color='black'),
             legend_title_text='Híbrido',
-            height=500
+            legend=dict(font=dict(size=16, color='black')),
+            height=600,
+            margin=dict(t=120)
         )
         fig_freq.update_xaxes(categoryorder='array',
                               categoryarray=list(range(1, 22)))
+        fig_freq.update_traces(
+            textfont=dict(size=20, color='black'),
+            textposition='outside',
+            cliponaxis=False
+        )
         st.plotly_chart(fig_freq, use_container_width=True)
+
 
 # Exibe em um expander
     # with st.expander('Tabela de Frequência de Resposta (por fazenda e híbrido)', expanded=False):
@@ -841,5 +852,5 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
             size=20, color='black'), tickfont=dict(size=18, color='black')),
     )
     fig_ranking.update_traces(textfont=dict(
-        size=18, color="black", family="Arial Black, Arial, sans-serif"))
+        size=14, color="black", family="Arial Black, Arial, sans-serif"))
     st.plotly_chart(fig_ranking, use_container_width=True)
