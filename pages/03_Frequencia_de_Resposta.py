@@ -705,6 +705,11 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         (0.80, "mediumseagreen"),
         (1.00, "green")
     ]
+    # Calcula altura dinâmica baseada no número de fazendas
+    num_fazendas = len(df_heatmap.index)
+    # Mínimo 500px, 25px por fazenda
+    altura_dinamica = max(500, num_fazendas * 25)
+
     fig = px.imshow(
         df_heatmap,
         labels=dict(x="Híbrido", y="Fazenda", color="Prod Rel (%)"),
@@ -717,13 +722,16 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     fig.update_layout(
         xaxis_title="Híbrido",
         yaxis_title="Fazenda",
-        margin=dict(l=40, r=40, t=40, b=40),
-        height=500,
+        # Aumenta margem esquerda para os nomes das fazendas
+        margin=dict(l=120, r=40, t=40, b=40),
+        height=altura_dinamica,  # Altura dinâmica
         font=dict(size=18),  # Fonte geral maior
         xaxis=dict(title_font=dict(size=20, color='black'),
                    tickfont=dict(size=16, color='black')),
         yaxis=dict(title_font=dict(size=20, color='black'),
-                   tickfont=dict(size=16, color='black')),
+                   # Reduz um pouco a fonte do eixo Y
+                   tickfont=dict(size=14, color='black'),
+                   tickangle=0),  # Garante que os nomes fiquem horizontais
         coloraxis_colorbar=dict(title_font=dict(
             size=18, color='black'), tickfont=dict(size=16, color='black')),
     )
@@ -865,6 +873,11 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         (0.5, "#66CDAA"),
         (1.0, "#C1E1C1")
     ]
+    # Calcula altura dinâmica baseada no número de fazendas
+    num_fazendas_ranking = len(df_heatmap_ranking.index)
+    # Mínimo 500px, 25px por fazenda
+    altura_dinamica_ranking = max(500, num_fazendas_ranking * 25)
+
     fig = px.imshow(
         df_heatmap_ranking,
         text_auto=True,
@@ -875,13 +888,16 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     fig.update_layout(
         xaxis_title="Híbrido",
         yaxis_title="Fazenda",
-        margin=dict(l=40, r=40, t=40, b=40),
-        height=500,
+        # Aumenta margem esquerda para os nomes das fazendas
+        margin=dict(l=120, r=40, t=40, b=40),
+        height=altura_dinamica_ranking,  # Altura dinâmica
         font=dict(size=18),  # Fonte geral maior
         xaxis=dict(title_font=dict(size=20, color='black'),
                    tickfont=dict(size=16, color='black')),
         yaxis=dict(title_font=dict(size=20, color='black'),
-                   tickfont=dict(size=16, color='black')),
+                   # Reduz um pouco a fonte do eixo Y
+                   tickfont=dict(size=14, color='black'),
+                   tickangle=0),  # Garante que os nomes fiquem horizontais
         coloraxis_colorbar=dict(title_font=dict(
             size=18, color='black'), tickfont=dict(size=16, color='black')),
     )
