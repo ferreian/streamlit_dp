@@ -256,8 +256,13 @@ st.download_button(
 
 
 def agrupa_index(idx):
-    if 201 <= idx <= 221:
-        return idx - 100
+    pares = {
+        201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
+        209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
+        216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
+    }
+    if idx in pares:
+        return pares[idx]
     return idx
 
 
@@ -551,75 +556,3 @@ if 'Híbrido' in df_analise_ciclo_agrupado_visualizacao.columns:
             plot_bgcolor='#f5f7fa'
         )
         st.plotly_chart(fig_scatter, use_container_width=True)
-
-# =========================
-# Precocidade: Scatter plot agrupado por Híbrido (média direta das parcelas)
-# =========================
-if 'Híbrido' in df_analise_ciclo_visualizacao.columns:
-    df_precocidade_parcela = df_analise_ciclo_visualizacao.groupby(
-        'Híbrido', as_index=False).mean(numeric_only=True)
-
-    if 'Umd (%)' in df_precocidade_parcela.columns and 'Prod@13.5% (sc/ha)' in df_precocidade_parcela.columns:
-        st.markdown(
-            """
-            <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
-                Precocidade: Média Direta das Parcelas por Híbrido
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        fig_scatter_parcela = px.scatter(
-            df_precocidade_parcela,
-            x='Umd (%)',
-            y='Prod@13.5% (sc/ha)',
-            color='Híbrido',
-            text='Híbrido',
-            labels={
-                'Umd (%)': 'Umidade (%)',
-                'Prod@13.5% (sc/ha)': 'Produtividade Corrigida (sc/ha)',
-                'Híbrido': 'Híbrido'
-            },
-            title='Dispersão: Umidade vs Produtividade Corrigida (Média Direta das Parcelas)'
-        )
-        fig_scatter_parcela.update_traces(
-            marker=dict(size=7, line=dict(width=1, color='DarkSlateGrey')),
-            textposition="top center"
-        )
-        # Cálculo das médias descartando zeros e nulos
-        media_x = df_precocidade_parcela['Umd (%)'][df_precocidade_parcela['Umd (%)'] > 0].mean(
-        )
-        media_y = df_precocidade_parcela['Prod@13.5% (sc/ha)'][df_precocidade_parcela['Prod@13.5% (sc/ha)'] > 0].mean()
-        # Adiciona linhas médias
-        fig_scatter_parcela.add_shape(
-            type="line",
-            x0=media_x, x1=media_x,
-            y0=df_precocidade_parcela['Prod@13.5% (sc/ha)'].min(),
-            y1=df_precocidade_parcela['Prod@13.5% (sc/ha)'].max(),
-            line=dict(color="#0070C0", width=2, dash="dash"),
-            name="Média Umidade"
-        )
-        fig_scatter_parcela.add_shape(
-            type="line",
-            x0=df_precocidade_parcela['Umd (%)'].min(),
-            x1=df_precocidade_parcela['Umd (%)'].max(),
-            y0=media_y, y1=media_y,
-            line=dict(color="#C00000", width=2, dash="dash"),
-            name="Média Produtividade"
-        )
-        # Anotações com valor e deslocamento
-        fig_scatter_parcela.add_annotation(x=media_x, y=df_precocidade_parcela['Prod@13.5% (sc/ha)'].max(),
-                                           text=f"Média Umidade ({media_x:.1f})", showarrow=False, yshift=30, font=dict(color="#0070C0", size=14))
-        fig_scatter_parcela.add_annotation(x=df_precocidade_parcela['Umd (%)'].max(), y=media_y,
-                                           text=f"Média Produtividade ({media_y:.1f})", showarrow=False, yshift=-30, font=dict(color="#C00000", size=14))
-        fig_scatter_parcela.update_layout(
-            font=dict(size=16, color='black'),
-            xaxis=dict(title_font=dict(size=18, color='black'),
-                       tickfont=dict(size=15, color='black'), dtick=1),
-            yaxis=dict(title_font=dict(size=18, color='black'),
-                       tickfont=dict(size=15, color='black'), dtick=10),
-            title_font=dict(size=20, color='black'),
-            legend_title_font=dict(size=16, color='black'),
-            margin=dict(t=60, b=40, l=40, r=40),
-            plot_bgcolor='#f5f7fa'
-        )
-        st.plotly_chart(fig_scatter_parcela, use_container_width=True)

@@ -6,6 +6,7 @@ import streamlit as st
 import os
 import sys
 import datetime
+import time
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 
@@ -144,6 +145,7 @@ def fetch_table(nome_tabela):
 TABELAS = list(nomes_tabelas.keys())
 
 # Sidebar com botões de carregamento e crédito do desenvolvedor
+
 with st.sidebar:
     st.markdown("### 🔄 Carregamento de Dados")
     st.markdown("Escolha como deseja carregar os dados:")
@@ -154,15 +156,58 @@ with st.sidebar:
         st.session_state["dataframes"] = dataframes
         st.success("✅ Dados carregados e armazenados!")
     if st.button("♻️ Carregar Dados sem cache (mais lento)"):
+        start_time = time.time()
+
+        # Limpeza do cache
+        cache_start = time.time()
         fetch_table.clear()  # limpa o cache da função
+        carregar_tabela_supabase.clear()  # limpa o cache da função base também
+        cache_time = time.time() - cache_start
+
+        # Carregamento dos dados
+        load_start = time.time()
         dataframes = {tabela: fetch_table(tabela) for tabela in TABELAS}
         # Carrega o Excel também
         dataframes[nome_df_excel] = carregar_excel(CAMINHO_EXCEL)
+        load_time = time.time() - load_start
+
+        # Atualização do session_state
+        session_start = time.time()
         st.session_state["dataframes"] = dataframes
+        # Atualiza também os DataFrames individuais no session_state
+        for nome, df in dataframes.items():
+            st.session_state[nome] = df
+        session_time = time.time() - session_start
+
+        # Regeneração do DataFrame tratado
+        process_start = time.time()
+        df_avTratamentoMilho, df_av2TratamentoMilho_merged, df_av3TratamentoMilho_merged, df_av4TratamentoMilho_merged = gerar_df_avTratamentoMilho(
+            st.session_state)
+        st.session_state["df_avTratamentoMilho"] = df_avTratamentoMilho
+        st.session_state["df_av2TratamentoMilho_merged"] = df_av2TratamentoMilho_merged
+        st.session_state["df_av3TratamentoMilho_merged"] = df_av3TratamentoMilho_merged
+        st.session_state["df_av4TratamentoMilho_merged"] = df_av4TratamentoMilho_merged
+        process_time = time.time() - process_start
+
+        total_time = time.time() - start_time
+
         st.session_state["last_update"] = datetime.datetime.now().strftime(
             "%d/%m/%Y %H:%M:%S")
         st.success(
             f"✅ Dados carregados direto do Supabase! (Atualizado em: {st.session_state['last_update']})")
+
+        # Mostrar tempos de cada etapa
+        st.info(f"""
+        ⏱️ **Tempos de execução:**
+        - Limpeza do cache: {cache_time:.2f}s
+        - Carregamento dos dados: {load_time:.2f}s
+        - Atualização do session_state: {session_time:.2f}s
+        - Processamento do DataFrame: {process_time:.2f}s
+        - **Tempo total: {total_time:.2f}s**
+        """)
+
+        # Recarrega a página para garantir que tudo seja atualizado
+        st.rerun()
     if "last_update" in st.session_state:
         st.markdown(
             f"<span style='font-size:12px;color:#888;'>Última atualização sem cache: <b>{st.session_state['last_update']}</b></span>", unsafe_allow_html=True)

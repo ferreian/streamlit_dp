@@ -545,5 +545,11 @@ def gerar_df_avTratamentoMilho(session_state):
             df_avTratamentoMilho[col] = pd.Series(
                 df_avTratamentoMilho[col], index=df_avTratamentoMilho.index).astype(str).str.upper()
 
+    # Correção específica para indexTratamento 208 e 219
+    if "indexTratamento" in df_avTratamentoMilho.columns and "nome" in df_avTratamentoMilho.columns:
+        mask = (df_avTratamentoMilho['indexTratamento'] == 208) | (
+            df_avTratamentoMilho['indexTratamento'] == 219)
+        df_avTratamentoMilho.loc[mask, 'nome'] = 'CS 9801 VIP3'
+
     # Retorna o DataFrame final já tratado e os intermediários
     return df_avTratamentoMilho, df_av2TratamentoMilho_merged, df_av3TratamentoMilho_merged, df_av4TratamentoMilho_merged

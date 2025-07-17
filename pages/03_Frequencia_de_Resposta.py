@@ -86,6 +86,10 @@ with st.sidebar:
         if selecionadas:
             df_filtrado = df_filtrado[df_filtrado[col].isin(selecionadas)]
 
+    # NOVO: Se todos os filtros estiverem vazios, mostra todos os dados
+    if all(len(st.session_state[f"sel_{key}"]) == 0 for _, _, key in filter_keys):
+        df_filtrado = df_avTratamentoMilho.copy()
+
 # =========================
 # Criação do DataFrame principal de análise
 # =========================
@@ -137,11 +141,15 @@ df_analise_conjunta_visualizacao = df_analise_conjunta[colunas_existentes].renam
 # Exibe o DataFrame filtrado original
 titulo_expander = "Dados Originais - Análise Conjunta da Produção e Componentes de Produção"
 with st.expander(titulo_expander, expanded=False):
-    st.dataframe(df_filtrado, use_container_width=True)
+    if not df_filtrado.empty:
+        st.dataframe(df_filtrado, use_container_width=True)
+    else:
+        st.info("Nenhum dado disponível para exibir.")
 
     # Botão para exportar em Excel o DataFrame filtrado original
     buffer_filtro = io.BytesIO()
-    df_filtrado.to_excel(buffer_filtro, index=False)  # type: ignore
+    df_filtrado.to_excel(buffer_filtro, index=False,
+                         engine='xlsxwriter')  # type: ignore
     buffer_filtro.seek(0)
     st.download_button(
         label="⬇️ Baixar Excel (dados originais - análise conjunta)",
@@ -237,6 +245,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.expander("Ver tabela de Produção e Componentes Produtivos", expanded=False):
+    if df_analise_conjunta_visualizacao.empty:
+        st.info(
+            "Nenhum dado disponível para exibir na tabela. Ajuste os filtros ou carregue os dados.")
     AgGrid(
         df_analise_conjunta_visualizacao,   # DataFrame a ser exibido
         gridOptions=grid_options,           # Opções de configuração do grid
@@ -251,7 +262,7 @@ with st.expander("Ver tabela de Produção e Componentes Produtivos", expanded=F
     # Botão para exportar em Excel o DataFrame customizado
     buffer = io.BytesIO()
     df_analise_conjunta_visualizacao.to_excel(
-        buffer, index=False)  # type: ignore
+        buffer, index=False, engine='xlsxwriter')  # type: ignore
     buffer.seek(0)
     st.download_button(
         label="⬇️ Baixar Excel (Produção e Componentes Produtivos)",
@@ -266,8 +277,13 @@ with st.expander("Ver tabela de Produção e Componentes Produtivos", expanded=F
 
 
 def agrupa_index(idx):
-    if 201 <= idx <= 221:
-        return idx - 100
+    pares = {
+        201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
+        209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
+        216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
+    }
+    if idx in pares:
+        return pares[idx]
     return idx
 
 
@@ -357,67 +373,72 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.expander("Ver tabela de Dados Conjuntos por Híbrido", expanded=False):
-    gb_agrupado = GridOptionsBuilder.from_dataframe(
-        df_analise_conjunta_agrupado_visualizacao)
+    if not df_analise_conjunta_agrupado_visualizacao.empty:
+        gb_agrupado = GridOptionsBuilder.from_dataframe(
+            df_analise_conjunta_agrupado_visualizacao)
 
-    # Configuração de casas decimais para colunas numéricas do agrupado
-    colunas_formatar_agrupado = {
-        "Prod@13.5% (kg/ha)": 1,
-        "Prod@13.5% (sc/ha)": 1,
-        "Pop (plantas/ha)": 0,
-        "AIE (m)": 2,
-        "ALT (m)": 2,
-        "PMG Umd (%)": 1,
-        "PMG@13.5% (g)": 1,
-        "Num Fileiras": 1,
-        "Num Grãos/Fileira": 0,
-        "Ardidos (%)": 1,
-        "Perda Total (%)": 1,
-        "Ciclo (dias)": 0
-    }
+        # Configuração de casas decimais para colunas numéricas do agrupado
+        colunas_formatar_agrupado = {
+            "Prod@13.5% (kg/ha)": 1,
+            "Prod@13.5% (sc/ha)": 1,
+            "Pop (plantas/ha)": 0,
+            "AIE (m)": 2,
+            "ALT (m)": 2,
+            "PMG Umd (%)": 1,
+            "PMG@13.5% (g)": 1,
+            "Num Fileiras": 1,
+            "Num Grãos/Fileira": 0,
+            "Ardidos (%)": 1,
+            "Perda Total (%)": 1,
+            "Ciclo (dias)": 0
+        }
 
-    for col in df_analise_conjunta_agrupado_visualizacao.columns:
-        if col in colunas_formatar_agrupado:
-            casas = colunas_formatar_agrupado[col]
-            gb_agrupado.configure_column(
-                col,
-                headerClass='ag-header-bold',
-                menuTabs=['generalMenuTab', 'filterMenuTab', 'columnsMenuTab'],
-                valueFormatter=f"value != null ? value.toFixed({casas}) : ''"
-            )
-        else:
-            gb_agrupado.configure_column(
-                col,
-                headerClass='ag-header-bold',
-                menuTabs=['generalMenuTab', 'filterMenuTab', 'columnsMenuTab']
-            )
-    # Configura opções padrão para todas as colunas
-    # (não editável, agrupável, filtrável, redimensionável, fonte 12px)
-    gb_agrupado.configure_default_column(editable=False, groupable=True,
-                                         filter=True, resizable=True, cellStyle={'fontSize': '12px'})
-    # Ajusta a altura do cabeçalho
-    gb_agrupado.configure_grid_options(headerHeight=30)
-    grid_options_agrupado = gb_agrupado.build()
+        for col in df_analise_conjunta_agrupado_visualizacao.columns:
+            if col in colunas_formatar_agrupado:
+                casas = colunas_formatar_agrupado[col]
+                gb_agrupado.configure_column(
+                    col,
+                    headerClass='ag-header-bold',
+                    menuTabs=['generalMenuTab',
+                              'filterMenuTab', 'columnsMenuTab'],
+                    valueFormatter=f"value != null ? value.toFixed({casas}) : ''"
+                )
+            else:
+                gb_agrupado.configure_column(
+                    col,
+                    headerClass='ag-header-bold',
+                    menuTabs=['generalMenuTab',
+                              'filterMenuTab', 'columnsMenuTab']
+                )
+        # Configura opções padrão para todas as colunas
+        # (não editável, agrupável, filtrável, redimensionável, fonte 12px)
+        gb_agrupado.configure_default_column(editable=False, groupable=True,
+                                             filter=True, resizable=True, cellStyle={'fontSize': '12px'})
+        # Ajusta a altura do cabeçalho
+        gb_agrupado.configure_grid_options(headerHeight=30)
+        grid_options_agrupado = gb_agrupado.build()
 
-    if 'Média do Local (sc/ha)' in df_analise_conjunta_agrupado_visualizacao.columns:
-        df_analise_conjunta_agrupado_visualizacao = df_analise_conjunta_agrupado_visualizacao.sort_values(
-            'Média do Local (sc/ha)', ascending=True)
+        if 'Média do Local (sc/ha)' in df_analise_conjunta_agrupado_visualizacao.columns:
+            df_analise_conjunta_agrupado_visualizacao = df_analise_conjunta_agrupado_visualizacao.sort_values(
+                'Média do Local (sc/ha)', ascending=True)
 
-    AgGrid(
-        df_analise_conjunta_agrupado_visualizacao,
-        gridOptions=grid_options_agrupado,
-        enable_enterprise_modules=True,
-        fit_columns_on_grid_load=False,
-        theme="streamlit",
-        height=500,
-        reload_data=True,
-        custom_css=custom_css
-    )
+        AgGrid(
+            df_analise_conjunta_agrupado_visualizacao,
+            gridOptions=grid_options_agrupado,
+            enable_enterprise_modules=True,
+            fit_columns_on_grid_load=False,
+            theme="streamlit",
+            height=500,
+            reload_data=True,
+            custom_css=custom_css
+        )
+    else:
+        st.info("Nenhum dado disponível para exibir na tabela.")
 
     # Botão para exportar em Excel o DataFrame agrupado customizado
     buffer_agrupado_vis = io.BytesIO()
     df_analise_conjunta_agrupado_visualizacao.to_excel(
-        buffer_agrupado_vis, index=False)  # type: ignore
+        buffer_agrupado_vis, index=False, engine='xlsxwriter')  # type: ignore
     buffer_agrupado_vis.seek(0)
     st.download_button(
         label="⬇️ Baixar Excel (Resumo da Conjunta de Produção)",
@@ -431,6 +452,9 @@ with st.expander("Ver tabela de Dados Conjuntos por Híbrido", expanded=False):
 # Agrupamento por fazendaRef e pares de indexTratamento (Frequência de Resposta)
 # =========================
 # Cria coluna de agrupamento para pares (101,201), (102,202), ..., (121,221)
+
+# Inicializa df_frequencia
+df_frequencia = pd.DataFrame()
 
 # Cria coluna auxiliar para agrupamento
 if 'indexTratamento' in df_analise_conjunta.columns:
@@ -498,10 +522,10 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
             df_frequencia['Prod@13.5% (sc/ha)'] / df_frequencia['Prod_max_fazenda'] * 100).round(1)
         # Cálculo do Ranking Global (antes dos filtros)
 
-        def agrupa_index(idx):
-            if 201 <= idx <= 221:
-                return idx - 100
-            return idx
+        # def agrupa_index(idx):
+        #     if 201 <= idx <= 221:
+        #         return idx - 100
+        #     return idx
 
         # Calcula o ranking global de cada híbrido dentro de cada fazenda
         _df_ranking_global = (
@@ -648,9 +672,11 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-if isinstance(df_frequencia, np.ndarray):
-    df_frequencia = pd.DataFrame(df_frequencia)
-if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Híbrido', 'Fazenda', 'Prod Rel (%)']):
+
+# Inicializa df_frequencia_visualizacao
+df_frequencia_visualizacao = None
+
+if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Híbrido', 'Fazenda', 'Prod Rel (%)']):
     st.markdown("""
     <div style="
         background-color: #e7f0fa;
@@ -662,7 +688,7 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
         color: #22223b;
         font-weight: 600;
     ">
-        Mapa de Frequência e Produção Rekativa de Híbridos nos Diferentes Locais
+        Mapa de Frequência e Produção Relativa de Híbridos nos Diferentes Locais
     </div>
     """, unsafe_allow_html=True)
     # Pivot para formato de matriz, usando média para resolver duplicidade
@@ -706,7 +732,7 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
         size=14, family="Arial Black, Arial, sans-serif", color="black"))
     st.plotly_chart(fig, use_container_width=True)
 
-    # Exibe df_frequencia_visualizacao em um AgGrid abaixo do gráfico
+    # Prepara df_frequencia_visualizacao para a tabela
     df_frequencia_visualizacao = df_frequencia.copy()
     if 'Ranking' not in df_frequencia_visualizacao.columns and 'Ranking' in df_frequencia.columns:
         df_frequencia_visualizacao['Ranking'] = df_frequencia['Ranking']
@@ -714,8 +740,9 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
         df_frequencia_visualizacao = df_frequencia_visualizacao.drop(columns=[
                                                                      'fazendaRef'])
 
-# (após todos os gráficos e heatmaps)
-
+# =========================
+# Tabela de Frequência de Resposta
+# =========================
 st.markdown(
     """
     <div style="
@@ -733,6 +760,16 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Debug: verifica o estado das variáveis
+st.write(
+    f"Debug - df_frequencia_visualizacao é None: {df_frequencia_visualizacao is None}")
+if df_frequencia_visualizacao is not None:
+    st.write(
+        f"Debug - df_frequencia_visualizacao está vazio: {df_frequencia_visualizacao.empty}")
+    st.write(
+        f"Debug - Colunas disponíveis: {list(df_frequencia_visualizacao.columns)}")
+
 if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.empty:
     gb_freq = GridOptionsBuilder.from_dataframe(df_frequencia_visualizacao)
     colunas_formatar_freq = {
@@ -771,8 +808,11 @@ if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.emp
         }
     }
     grid_options_freq = gb_freq.build()
+
+    # Verifica se é Series e converte para DataFrame se necessário
     if isinstance(df_frequencia_visualizacao, pd.Series):
         df_frequencia_visualizacao = df_frequencia_visualizacao.to_frame().T
+
     AgGrid(
         df_frequencia_visualizacao,
         gridOptions=grid_options_freq,
@@ -783,11 +823,12 @@ if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.emp
         reload_data=True,
         custom_css=custom_css_freq
     )
+
+    # Botão para exportar em Excel
     buffer_freq_vis = io.BytesIO()
-    # O uso de BytesIO com pd.ExcelWriter é suportado em tempo de execução, mas pode gerar falso positivo no linter.
     # type: ignore
-    with pd.ExcelWriter(buffer_freq_vis, engine='xlsxwriter') as writer:  # type: ignore
-        df_frequencia_visualizacao.to_excel(writer, index=False)
+    df_frequencia_visualizacao.to_excel(
+        buffer_freq_vis, index=False, engine='xlsxwriter')  # type: ignore
     buffer_freq_vis.seek(0)
     st.download_button(
         label='⬇️ Baixar Excel (Tabela Frequência Visualização)',
@@ -798,8 +839,10 @@ if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.emp
 else:
     st.info("Nenhum dado disponível para exibir na tabela. Ajuste os filtros ou carregue os dados.")
 
-# Exibe o heatmap de Ranking APÓS a tabela AgGrid
-if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Híbrido', 'Fazenda', 'Ranking']):
+# =========================
+# Heatmap de Ranking
+# =========================
+if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Híbrido', 'Fazenda', 'Ranking']):
     st.markdown("""
     <div style="
         background-color: #e7f0fa;
@@ -815,42 +858,34 @@ if not df_frequencia.empty and all(col in df_frequencia.columns for col in ['Hí
     </div>
     """, unsafe_allow_html=True)
     df_heatmap_ranking = df_frequencia.pivot_table(
-        index='Fazenda', columns='Híbrido', values='Ranking', aggfunc='mean'
+        index='Fazenda', columns='Híbrido', values='Ranking', aggfunc='min'
     )
-    escala_de_cores = [
-        (0.00, "forestgreen"),
-        (0.25, "green"),
-        (0.50, "mediumseagreen"),
-        (0.75, "lightgreen"),
-        (1.00, "honeydew")
+    escala_verde = [
+        (0.0, "#006400"),
+        (0.5, "#66CDAA"),
+        (1.0, "#C1E1C1")
     ]
-    import plotly.express as px
-    fig_ranking = px.imshow(
+    fig = px.imshow(
         df_heatmap_ranking,
-        labels=dict(x="Híbrido", y="Fazenda", color="Ranking"),
-        color_continuous_scale=escala_de_cores,
-        aspect='auto',
         text_auto=True,
-        zmin=1,
-        zmax=21
+        color_continuous_scale=escala_verde,
+        aspect="auto",
+        labels=dict(x="Híbrido", y="Fazenda", color="Ranking")
     )
-    fig_ranking.data[0].hovertemplate = (
-        'Fazenda: %{y}<br>Híbrido: %{x}<br>'
-        'Ranking: %{z:.1f}<extra></extra>'
-    )
-    fig_ranking.update_layout(
+    fig.update_layout(
         xaxis_title="Híbrido",
         yaxis_title="Fazenda",
         margin=dict(l=40, r=40, t=40, b=40),
         height=500,
-        font=dict(size=20, color='black'),
-        xaxis=dict(title_font=dict(size=22, color='black'),
-                   tickfont=dict(size=18, color='black')),
-        yaxis=dict(title_font=dict(size=22, color='black'),
-                   tickfont=dict(size=18, color='black')),
+        font=dict(size=18),  # Fonte geral maior
+        xaxis=dict(title_font=dict(size=20, color='black'),
+                   tickfont=dict(size=16, color='black')),
+        yaxis=dict(title_font=dict(size=20, color='black'),
+                   tickfont=dict(size=16, color='black')),
         coloraxis_colorbar=dict(title_font=dict(
-            size=20, color='black'), tickfont=dict(size=18, color='black')),
+            size=18, color='black'), tickfont=dict(size=16, color='black')),
     )
-    fig_ranking.update_traces(textfont=dict(
-        size=14, color="black", family="Arial Black, Arial, sans-serif"))
-    st.plotly_chart(fig_ranking, use_container_width=True)
+    # Aumenta fonte e coloca negrito nos rótulos dos valores
+    fig.update_traces(textfont=dict(
+        size=14, family="Arial Black, Arial, sans-serif", color="black"))
+    st.plotly_chart(fig, use_container_width=True)

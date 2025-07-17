@@ -258,8 +258,13 @@ st.download_button(
 
 
 def agrupa_index(idx):
-    if 201 <= idx <= 221:
-        return idx - 100
+    pares = {
+        201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
+        209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
+        216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
+    }
+    if idx in pares:
+        return pares[idx]
     return idx
 
 
@@ -444,8 +449,13 @@ st.markdown(
 if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_Acamadas"]):
     # Cria coluna de agrupamento dos pares
     def agrupa_index(idx):
-        if 201 <= idx <= 221:
-            return idx - 100
+        pares = {
+            201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
+            209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
+            216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
+        }
+        if idx in pares:
+            return pares[idx]
         return idx
     df_plot = df_analise_perdas.copy()
     df_plot["indexTratamentoAgrupado"] = df_plot["indexTratamento"].apply(
