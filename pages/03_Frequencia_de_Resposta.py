@@ -595,8 +595,8 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
             """,
             unsafe_allow_html=True
         )
-        # Garante que o eixo x (Ranking) vai de 1 a 21, mesmo que faltem valores
-        ordem_ranking = list(range(1, 22))
+        # Garante que o eixo x (Ranking) vai de 1 a 22, mesmo que faltem valores
+        ordem_ranking = list(range(1, 23))
         freq_ranking['Ranking'] = pd.Categorical(
             freq_ranking['Ranking'], categories=ordem_ranking, ordered=True)
         fig_freq = px.bar(
@@ -622,7 +622,7 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
             margin=dict(t=120)
         )
         fig_freq.update_xaxes(categoryorder='array',
-                              categoryarray=list(range(1, 22)))
+                              categoryarray=list(range(1, 23)))
         fig_freq.update_traces(
             textfont=dict(size=20, color='black'),
             textposition='outside',
@@ -878,6 +878,7 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     # Mínimo 500px, 25px por fazenda
     altura_dinamica_ranking = max(500, num_fazendas_ranking * 25)
 
+    df_heatmap_ranking = df_heatmap_ranking.fillna("-")
     fig = px.imshow(
         df_heatmap_ranking,
         text_auto=True,
@@ -885,6 +886,9 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         aspect="auto",
         labels=dict(x="Híbrido", y="Fazenda", color="Ranking")
     )
+    # Garante que o eixo X (Ranking) vá de 1 a 22
+    fig.update_xaxes(type='category', categoryorder='array',
+                     categoryarray=list(range(1, 23)))
     fig.update_layout(
         xaxis_title="Híbrido",
         yaxis_title="Fazenda",
