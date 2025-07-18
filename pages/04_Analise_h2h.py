@@ -899,6 +899,57 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
                             lambda x: "#01B8AA" if x > 1 else "#FD625E" if x < -1 else "#F2C80F"
                         )
 
+                        # Substituir nome da fazenda por código na coluna 'Local (Fazenda)'
+                        import unicodedata
+                        dicionario_fazendas_local = {
+                            "FAZ. SANTA TEREZA": "BAL_1_MA",
+                            "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
+                            "BRAVINHOS": "CPB_MG",
+                            "LOTE 17": "BAL_2_MA",
+                            "FAZENDA RONCADOR": "ARN_TO",
+                            "AGROMINA": "BAL_3_MA",
+                            "FAZENDA CIPÓ": "BDN_TO",
+                            "SANTA INÊS": "TPC_MG",
+                            "SÃO TOMAZ DOURADINHO_SHG": "SHG_GO",
+                            "FAZENDA VENEZA II - GRUPO UNIGGEL": "CAS_TO",
+                            "CERETTA E RIGON": "CJU_MT",
+                            "RANCHO 60": "QUE_1_MT",
+                            "SÍTIO DOIS IRMÃOS": "CVR_MT",
+                            "CAPÃO": "SGO_MS",
+                            "FAZENDA ARIRANHA": "JAT_GO",
+                            "FAZENDA 333": "RVD_GO",
+                            "FAZENDA TORRE": "JAC_MT",
+                            "FAZENDA RECANTO": "MRJ_MS",
+                            "CONQUISTA": "GMO_GO",
+                            "LONDRINA": "QUE_2_MT",
+                            "LUIZ PAULO PENNA": "SOR_MT",
+                            "FAZENDA MODELO": "ITA_MS",
+                            "SANTA RITA": "VIA_GO",
+                            "SANTO ANTÔNIO": "ARG_MG",
+                            "MARANEY": "CHC_GO",
+                            "ÁGUAS DE CHAPECÓ": "NMT_MT",
+                            "FAZENDA MAISA": "DOR_MS",
+                            "FAZENDA CANARINHO": "DIA_MT",
+                            "FAZENDA JACIARA": "LRV_MT",
+                            "LUIZ PAULO PENNA": "SCR_MT"
+                        }
+
+                        def padroniza_nome_local(nome):
+                            nome = nome.strip().upper()
+                            nome = unicodedata.normalize('NFKD', nome).encode(
+                                'ASCII', 'ignore').decode('ASCII')
+                            return nome
+                        dicionario_fazendas_local_padronizado = {padroniza_nome_local(
+                            k): v for k, v in dicionario_fazendas_local.items()}
+
+                        def substitui_nome_ou_codigo_local(nome):
+                            nome_strip = nome.strip()
+                            if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
+                                return nome_strip
+                            return dicionario_fazendas_local_padronizado.get(padroniza_nome_local(nome_strip), nome_strip)
+                        df_graf_sorted["Local (Fazenda)"] = df_graf_sorted["Local (Fazenda)"].apply(
+                            substitui_nome_ou_codigo_local)
+
                         # Título e subtítulo no padrão da página
                         st.markdown(f"""
                             <div style='background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 10px 18px; margin-bottom: 8px; border-radius: 6px; font-size: 1.1em; color: #22223b; font-weight: 600;'>
@@ -936,7 +987,7 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
                                     size=13, family="Arial Black", color="black")
                             ),
                             margin=dict(t=30, b=30, l=90, r=30),
-                            height=500,
+                            height=700,  # aumentada de 500 para 700
                             showlegend=False
                         )
 

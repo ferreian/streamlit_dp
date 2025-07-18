@@ -8,6 +8,63 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy.stats import gaussian_kde
 from scipy.interpolate import make_interp_spline
+import unicodedata
+
+# Após os imports, defina as funções e o dicionário UMA VEZ SÓ:
+
+
+def agrupa_index(idx):
+    pares = {
+        201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
+        209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
+        216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
+    }
+    if idx in pares:
+        return pares[idx]
+    return idx
+
+dicionario_fazendas_linhas = {
+    "FAZ. SANTA TEREZA": "BAL_1_MA",
+    "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
+    "BRAVINHOS": "CPB_MG",
+    "LOTE 17": "BAL_2_MA",
+    "FAZENDA RONCADOR": "ARN_TO",
+    "AGROMINA": "BAL_3_MA",
+    "FAZENDA CIPÓ": "BDN_TO",
+    "SANTA INÊS": "TPC_MG",
+    "SÃO TOMAZ DOURADINHO_SHG": "SHG_GO",
+    "FAZENDA VENEZA II - GRUPO UNIGGEL": "CAS_TO",
+    "CERETTA E RIGON": "CJU_MT",
+    "RANCHO 60": "QUE_1_MT",
+    "SÍTIO DOIS IRMÃOS": "CVR_MT",
+    "CAPÃO": "SGO_MS",
+    "FAZENDA ARIRANHA": "JAT_GO",
+    "FAZENDA 333": "RVD_GO",
+    "FAZENDA TORRE": "JAC_MT",
+    "FAZENDA RECANTO": "MRJ_MS",
+    "CONQUISTA": "GMO_GO",
+    "LONDRINA": "QUE_2_MT",
+    "LUIZ PAULO PENNA": "SOR_MT",
+    "FAZENDA MODELO": "ITA_MS",
+    "SANTA RITA": "VIA_GO",
+    "SANTO ANTÔNIO": "ARG_MG",
+    "MARANEY": "CHC_GO",
+    "ÁGUAS DE CHAPECÓ": "NMT_MT",
+    "FAZENDA MAISA": "DOR_MS",
+    "FAZENDA CANARINHO": "DIA_MT",
+    "FAZENDA JACIARA": "LRV_MT",
+    "LUIZ PAULO PENNA": "SCR_MT"
+}
+def padroniza_nome_linha(nome):
+    nome = nome.strip().upper()
+    nome = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
+    return nome
+dicionario_fazendas_linhas_padronizado = {padroniza_nome_linha(k): v for k, v in dicionario_fazendas_linhas.items()}
+def substitui_nome_ou_codigo_linha(nome):
+    nome_strip = nome.strip()
+    if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
+        return nome_strip
+    return dicionario_fazendas_linhas_padronizado.get(padroniza_nome_linha(nome_strip), nome_strip)
 
 # =========================
 # Header customizado do dashboard
@@ -257,17 +314,6 @@ st.download_button(
 # Cria coluna de agrupamento para pares (101,201), (102,202), ..., (121,221)
 
 
-def agrupa_index(idx):
-    pares = {
-        201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
-        209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
-        216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
-    }
-    if idx in pares:
-        return pares[idx]
-    return idx
-
-
 df_analise_perdas['indexTratamentoAgrupado'] = df_analise_perdas['indexTratamento'].apply(
     agrupa_index)
 
@@ -446,18 +492,13 @@ st.markdown(
 # =========================
 # Gráfico de linhas: perc_Acamadas por Fazenda e Híbrido (média dos pares de indexTratamento)
 # =========================
+# Dicionário de códigos das fazendas (ajuste conforme necessário)
+# Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
 if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_Acamadas"]):
-    # Cria coluna de agrupamento dos pares
-    def agrupa_index(idx):
-        pares = {
-            201: 101, 202: 102, 203: 103, 204: 104, 205: 105, 206: 106, 207: 107,
-            209: 109, 210: 110, 211: 111, 212: 112, 213: 113, 214: 114, 215: 115,
-            216: 116, 217: 117, 218: 118, 220: 120, 221: 121, 219: 208
-        }
-        if idx in pares:
-            return pares[idx]
-        return idx
     df_plot = df_analise_perdas.copy()
+    # Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
+    df_plot["nomeFazenda"] = df_plot["nomeFazenda"].apply(
+        substitui_nome_ou_codigo_linha)
     df_plot["indexTratamentoAgrupado"] = df_plot["indexTratamento"].apply(
         agrupa_index)
     # Agrupa por fazenda, híbrido e par, calcula média de perc_Acamadas
@@ -471,18 +512,16 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
         index="nomeFazenda", columns="nome", values="perc_Acamadas").fillna(0)
     df_linhas_completo = df_pivot.reset_index().melt(
         id_vars="nomeFazenda", var_name="nome", value_name="perc_Acamadas")
-    # Ordena fazendas para eixo x (ordem alfabética para melhor leitura)
     fazendas_ordem = sorted(
         df_linhas_completo["nomeFazenda"].unique().tolist())
     st.markdown(
         """
-        <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
-            Perdas Física por Local - Plantas Acamadas (%)
-        </div>
-        """,
+            <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+                Perdas Física por Local - Plantas Acamadas (%)
+            </div>
+            """,
         unsafe_allow_html=True
     )
-    import plotly.express as px
     fig_linhas = px.line(
         df_linhas_completo,
         x="nomeFazenda",
@@ -528,64 +567,147 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
     fig_linhas.update_traces(mode="lines+markers")
     st.plotly_chart(fig_linhas, use_container_width=True)
 
-    # =========================
-    # Gráfico de linhas: perc_Quebradas por Fazenda e Híbrido (média dos pares de indexTratamento)
-    # =========================
-    st.markdown(
-        """
+# =========================
+# Gráfico de linhas: perc_Quebradas por Fazenda e Híbrido (média dos pares de indexTratamento)
+# =========================
+st.markdown(
+    """
         <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
             Perdas Física por Local - Plantas Quebradas (%)
         </div>
         """,
+    unsafe_allow_html=True
+)
+# Agrupa por fazenda, híbrido e par, calcula média de perc_Quebradas
+if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_Quebradas"]):
+    df_plot_qbr = df_analise_perdas.copy()
+    # Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
+    df_plot_qbr["nomeFazenda"] = df_plot_qbr["nomeFazenda"].apply(
+        substitui_nome_ou_codigo_linha)
+    df_plot_qbr["indexTratamentoAgrupado"] = df_plot_qbr["indexTratamento"].apply(
+        agrupa_index)
+    # Agrupa por fazenda, híbrido e par, calcula média de perc_Quebradas
+    df_linhas_qbr = df_plot_qbr.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
+        "perc_Quebradas"].mean()
+    # Agrupa por fazenda e híbrido, tirando a média dos pares para evitar duplicatas
+    df_linhas_qbr_unica = df_linhas_qbr.groupby(['nomeFazenda', 'nome'], as_index=False)[
+        'perc_Quebradas'].mean()
+    # Pivot para garantir todas as combinações fazenda × híbrido, preenchendo ausentes com zero
+    df_pivot_qbr = df_linhas_qbr_unica.pivot(
+        index="nomeFazenda", columns="nome", values="perc_Quebradas").fillna(0)
+    df_linhas_qbr_completo = df_pivot_qbr.reset_index().melt(
+        id_vars="nomeFazenda", var_name="nome", value_name="perc_Quebradas")
+    fazendas_ordem_qbr = sorted(
+        df_linhas_qbr_completo["nomeFazenda"].unique().tolist())
+    fig_linhas_qbr = px.line(
+        df_linhas_qbr_completo,
+        x="nomeFazenda",
+        y="perc_Quebradas",
+        color="nome",
+        markers=True,
+        labels={
+            "nomeFazenda": "Local",
+            "perc_Quebradas": "Quebradas (%)",
+            "nome": "Híbrido"
+        },
+        title="Perdas físicas - Quebradas (%)",
+        line_shape="spline"
+    )
+    fig_linhas_qbr.update_layout(
+        xaxis=dict(
+            categoryorder="array",
+            categoryarray=fazendas_ordem_qbr,
+            tickangle=-45,
+            title="Local",
+            title_font=dict(size=22, color='black'),
+            showgrid=False,
+            color='black',  # força fonte preta
+            tickfont=dict(color='black'),  # cor dos valores do eixo x
+        ),
+        yaxis=dict(
+            title="Quebradas (%)",
+            title_font=dict(size=22, color='black'),
+            showgrid=True,
+            gridcolor='#cccccc',
+            gridwidth=1,
+            color='black',  # força fonte preta
+            tickfont=dict(color='black'),  # cor dos valores do eixo y
+        ),
+        font=dict(size=15, color='black'),
+        legend_title_font=dict(size=15, color='black'),
+        legend=dict(font=dict(color='black')),
+        height=600,
+        margin=dict(t=60, b=80, l=40, r=40),
+        plot_bgcolor="#f5f7fa"
+    )
+    fig_linhas_qbr.update_traces(mode="lines+markers")
+    st.plotly_chart(fig_linhas_qbr, use_container_width=True)
+
+    # =========================
+    # Gráfico de linhas: perc_Dominadas por Fazenda e Híbrido (média dos pares de indexTratamento)
+    # =========================
+    st.markdown(
+        """
+            <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+                Perdas Física por Local - Plantas Dominadas (%)
+            </div>
+            """,
         unsafe_allow_html=True
     )
-    # Agrupa por fazenda, híbrido e par, calcula média de perc_Quebradas
-    if "perc_Quebradas" in df_plot.columns:
-        df_linhas_qbr = df_plot.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
-            "perc_Quebradas"].mean()
+    # Agrupa por fazenda, híbrido e par, calcula média de perc_Dominadas
+    if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_Dominadas"]):
+        df_plot_dmn = df_analise_perdas.copy()
+        # Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
+        df_plot_dmn["nomeFazenda"] = df_plot_dmn["nomeFazenda"].apply(
+            substitui_nome_ou_codigo_linha)
+        df_plot_dmn["indexTratamentoAgrupado"] = df_plot_dmn["indexTratamento"].apply(
+            agrupa_index)
+        # Agrupa por fazenda, híbrido e par, calcula média de perc_Dominadas
+        df_linhas_dmn = df_plot_dmn.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
+            "perc_Dominadas"].mean()
         # Agrupa por fazenda e híbrido, tirando a média dos pares para evitar duplicatas
-        df_linhas_qbr_unica = df_linhas_qbr.groupby(['nomeFazenda', 'nome'], as_index=False)[
-            'perc_Quebradas'].mean()
+        df_linhas_dmn_unica = df_linhas_dmn.groupby(['nomeFazenda', 'nome'], as_index=False)[
+            'perc_Dominadas'].mean()
         # Pivot para garantir todas as combinações fazenda × híbrido, preenchendo ausentes com zero
-        df_pivot_qbr = df_linhas_qbr_unica.pivot(
-            index="nomeFazenda", columns="nome", values="perc_Quebradas").fillna(0)
-        df_linhas_qbr_completo = df_pivot_qbr.reset_index().melt(
-            id_vars="nomeFazenda", var_name="nome", value_name="perc_Quebradas")
-        fazendas_ordem_qbr = sorted(
-            df_linhas_qbr_completo["nomeFazenda"].unique().tolist())
-        fig_linhas_qbr = px.line(
-            df_linhas_qbr_completo,
+        df_pivot_dmn = df_linhas_dmn_unica.pivot(
+            index="nomeFazenda", columns="nome", values="perc_Dominadas").fillna(0)
+        df_linhas_dmn_completo = df_pivot_dmn.reset_index().melt(
+            id_vars="nomeFazenda", var_name="nome", value_name="perc_Dominadas")
+        fazendas_ordem_dmn = sorted(
+            df_linhas_dmn_completo["nomeFazenda"].unique().tolist())
+        fig_linhas_dmn = px.line(
+            df_linhas_dmn_completo,
             x="nomeFazenda",
-            y="perc_Quebradas",
+            y="perc_Dominadas",
             color="nome",
             markers=True,
             labels={
                 "nomeFazenda": "Local",
-                "perc_Quebradas": "Quebradas (%)",
+                "perc_Dominadas": "Dominadas (%)",
                 "nome": "Híbrido"
             },
-            title="Perdas físicas - Quebradas (%)",
+            title="Perdas físicas - Dominadas (%)",
             line_shape="spline"
         )
-        fig_linhas_qbr.update_layout(
+        fig_linhas_dmn.update_layout(
             xaxis=dict(
                 categoryorder="array",
-                categoryarray=fazendas_ordem_qbr,
+                categoryarray=fazendas_ordem_dmn,
                 tickangle=-45,
                 title="Local",
                 title_font=dict(size=22, color='black'),
                 showgrid=False,
-                color='black',  # força fonte preta
-                tickfont=dict(color='black'),  # cor dos valores do eixo x
+                color='black',
+                tickfont=dict(color='black'),
             ),
             yaxis=dict(
-                title="Quebradas (%)",
+                title="Dominadas (%)",
                 title_font=dict(size=22, color='black'),
                 showgrid=True,
                 gridcolor='#cccccc',
                 gridwidth=1,
-                color='black',  # força fonte preta
-                tickfont=dict(color='black'),  # cor dos valores do eixo y
+                color='black',
+                tickfont=dict(color='black'),
             ),
             font=dict(size=15, color='black'),
             legend_title_font=dict(size=15, color='black'),
@@ -594,52 +716,59 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
             margin=dict(t=60, b=80, l=40, r=40),
             plot_bgcolor="#f5f7fa"
         )
-        fig_linhas_qbr.update_traces(mode="lines+markers")
-        st.plotly_chart(fig_linhas_qbr, use_container_width=True)
+        fig_linhas_dmn.update_traces(mode="lines+markers")
+        st.plotly_chart(fig_linhas_dmn, use_container_width=True)
 
         # =========================
-        # Gráfico de linhas: perc_Dominadas por Fazenda e Híbrido (média dos pares de indexTratamento)
+        # Gráfico de linhas: perc_ColmoPodre por Fazenda e Híbrido (média dos pares de indexTratamento)
         # =========================
         st.markdown(
             """
-            <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
-                Perdas Física por Local - Plantas Dominadas (%)
-            </div>
-            """,
+                <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+                    Perdas Física por Local - Plantas com Colmo Podre (%)
+                </div>
+                """,
             unsafe_allow_html=True
         )
-        # Agrupa por fazenda, híbrido e par, calcula média de perc_Dominadas
-        if "perc_Dominadas" in df_plot.columns:
-            df_linhas_dmn = df_plot.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
-                "perc_Dominadas"].mean()
+        # Agrupa por fazenda, híbrido e par, calcula média de perc_ColmoPodre
+        if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_ColmoPodre"]):
+            df_plot_cp = df_analise_perdas.copy()
+            # Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
+            df_plot_cp["nomeFazenda"] = df_plot_cp["nomeFazenda"].apply(
+                substitui_nome_ou_codigo_linha)
+            df_plot_cp["indexTratamentoAgrupado"] = df_plot_cp["indexTratamento"].apply(
+                agrupa_index)
+            # Agrupa por fazenda, híbrido e par, calcula média de perc_ColmoPodre
+            df_linhas_cp = df_plot_cp.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
+                "perc_ColmoPodre"].mean()
             # Agrupa por fazenda e híbrido, tirando a média dos pares para evitar duplicatas
-            df_linhas_dmn_unica = df_linhas_dmn.groupby(['nomeFazenda', 'nome'], as_index=False)[
-                'perc_Dominadas'].mean()
+            df_linhas_cp_unica = df_linhas_cp.groupby(['nomeFazenda', 'nome'], as_index=False)[
+                'perc_ColmoPodre'].mean()
             # Pivot para garantir todas as combinações fazenda × híbrido, preenchendo ausentes com zero
-            df_pivot_dmn = df_linhas_dmn_unica.pivot(
-                index="nomeFazenda", columns="nome", values="perc_Dominadas").fillna(0)
-            df_linhas_dmn_completo = df_pivot_dmn.reset_index().melt(
-                id_vars="nomeFazenda", var_name="nome", value_name="perc_Dominadas")
-            fazendas_ordem_dmn = sorted(
-                df_linhas_dmn_completo["nomeFazenda"].unique().tolist())
-            fig_linhas_dmn = px.line(
-                df_linhas_dmn_completo,
+            df_pivot_cp = df_linhas_cp_unica.pivot(
+                index="nomeFazenda", columns="nome", values="perc_ColmoPodre").fillna(0)
+            df_linhas_cp_completo = df_pivot_cp.reset_index().melt(
+                id_vars="nomeFazenda", var_name="nome", value_name="perc_ColmoPodre")
+            fazendas_ordem_cp = sorted(
+                df_linhas_cp_completo["nomeFazenda"].unique().tolist())
+            fig_linhas_cp = px.line(
+                df_linhas_cp_completo,
                 x="nomeFazenda",
-                y="perc_Dominadas",
+                y="perc_ColmoPodre",
                 color="nome",
                 markers=True,
                 labels={
                     "nomeFazenda": "Local",
-                    "perc_Dominadas": "Dominadas (%)",
+                    "perc_ColmoPodre": "Colmo Podre (%)",
                     "nome": "Híbrido"
                 },
-                title="Perdas físicas - Dominadas (%)",
+                title="Perdas físicas - Colmo Podre (%)",
                 line_shape="spline"
             )
-            fig_linhas_dmn.update_layout(
+            fig_linhas_cp.update_layout(
                 xaxis=dict(
                     categoryorder="array",
-                    categoryarray=fazendas_ordem_dmn,
+                    categoryarray=fazendas_ordem_cp,
                     tickangle=-45,
                     title="Local",
                     title_font=dict(size=22, color='black'),
@@ -648,7 +777,7 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
                     tickfont=dict(color='black'),
                 ),
                 yaxis=dict(
-                    title="Dominadas (%)",
+                    title="Colmo Podre (%)",
                     title_font=dict(size=22, color='black'),
                     showgrid=True,
                     gridcolor='#cccccc',
@@ -663,52 +792,59 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
                 margin=dict(t=60, b=80, l=40, r=40),
                 plot_bgcolor="#f5f7fa"
             )
-            fig_linhas_dmn.update_traces(mode="lines+markers")
-            st.plotly_chart(fig_linhas_dmn, use_container_width=True)
+            fig_linhas_cp.update_traces(mode="lines+markers")
+            st.plotly_chart(fig_linhas_cp, use_container_width=True)
 
             # =========================
-            # Gráfico de linhas: perc_ColmoPodre por Fazenda e Híbrido (média dos pares de indexTratamento)
+            # Gráfico de linhas: perc_Total por Fazenda e Híbrido (média dos pares de indexTratamento)
             # =========================
             st.markdown(
                 """
-                <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
-                    Perdas Física por Local - Plantas com Colmo Podre (%)
-                </div>
-                """,
+                    <div style=\"background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;\">
+                        Perdas Física por Local - Total (%)
+                    </div>
+                    """,
                 unsafe_allow_html=True
             )
-            # Agrupa por fazenda, híbrido e par, calcula média de perc_ColmoPodre
-            if "perc_ColmoPodre" in df_plot.columns:
-                df_linhas_cp = df_plot.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
-                    "perc_ColmoPodre"].mean()
+            # Agrupa por fazenda, híbrido e par, calcula média de perc_Total
+            if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "indexTratamento", "perc_Total"]):
+                df_plot_total = df_analise_perdas.copy()
+                # Aplica a substituição na coluna 'nomeFazenda' ANTES do agrupamento
+                df_plot_total["nomeFazenda"] = df_plot_total["nomeFazenda"].apply(
+                    substitui_nome_ou_codigo_linha)
+                df_plot_total["indexTratamentoAgrupado"] = df_plot_total["indexTratamento"].apply(
+                    agrupa_index)
+                # Agrupa por fazenda, híbrido e par, calcula média de perc_Total
+                df_linhas_total = df_plot_total.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
+                    "perc_Total"].mean()
                 # Agrupa por fazenda e híbrido, tirando a média dos pares para evitar duplicatas
-                df_linhas_cp_unica = df_linhas_cp.groupby(['nomeFazenda', 'nome'], as_index=False)[
-                    'perc_ColmoPodre'].mean()
+                df_linhas_total_unica = df_linhas_total.groupby(['nomeFazenda', 'nome'], as_index=False)[
+                    'perc_Total'].mean()
                 # Pivot para garantir todas as combinações fazenda × híbrido, preenchendo ausentes com zero
-                df_pivot_cp = df_linhas_cp_unica.pivot(
-                    index="nomeFazenda", columns="nome", values="perc_ColmoPodre").fillna(0)
-                df_linhas_cp_completo = df_pivot_cp.reset_index().melt(
-                    id_vars="nomeFazenda", var_name="nome", value_name="perc_ColmoPodre")
-                fazendas_ordem_cp = sorted(
-                    df_linhas_cp_completo["nomeFazenda"].unique().tolist())
-                fig_linhas_cp = px.line(
-                    df_linhas_cp_completo,
+                df_pivot_total = df_linhas_total_unica.pivot(
+                    index="nomeFazenda", columns="nome", values="perc_Total").fillna(0)
+                df_linhas_total_completo = df_pivot_total.reset_index().melt(
+                    id_vars="nomeFazenda", var_name="nome", value_name="perc_Total")
+                fazendas_ordem_total = sorted(
+                    df_linhas_total_completo["nomeFazenda"].unique().tolist())
+                fig_linhas_total = px.line(
+                    df_linhas_total_completo,
                     x="nomeFazenda",
-                    y="perc_ColmoPodre",
+                    y="perc_Total",
                     color="nome",
                     markers=True,
                     labels={
                         "nomeFazenda": "Local",
-                        "perc_ColmoPodre": "Colmo Podre (%)",
+                        "perc_Total": "Total (%)",
                         "nome": "Híbrido"
                     },
-                    title="Perdas físicas - Colmo Podre (%)",
+                    title="Perdas físicas - Total (%)",
                     line_shape="spline"
                 )
-                fig_linhas_cp.update_layout(
+                fig_linhas_total.update_layout(
                     xaxis=dict(
                         categoryorder="array",
-                        categoryarray=fazendas_ordem_cp,
+                        categoryarray=fazendas_ordem_total,
                         tickangle=-45,
                         title="Local",
                         title_font=dict(size=22, color='black'),
@@ -717,7 +853,7 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
                         tickfont=dict(color='black'),
                     ),
                     yaxis=dict(
-                        title="Colmo Podre (%)",
+                        title="Total (%)",
                         title_font=dict(size=22, color='black'),
                         showgrid=True,
                         gridcolor='#cccccc',
@@ -732,77 +868,8 @@ if all(col in df_analise_perdas.columns for col in ["nomeFazenda", "nome", "inde
                     margin=dict(t=60, b=80, l=40, r=40),
                     plot_bgcolor="#f5f7fa"
                 )
-                fig_linhas_cp.update_traces(mode="lines+markers")
-                st.plotly_chart(fig_linhas_cp, use_container_width=True)
-
-                # =========================
-                # Gráfico de linhas: perc_Total por Fazenda e Híbrido (média dos pares de indexTratamento)
-                # =========================
-                st.markdown(
-                    """
-                    <div style=\"background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;\">
-                        Perdas Física por Local - Total (%)
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-                # Agrupa por fazenda, híbrido e par, calcula média de perc_Total
-                if "perc_Total" in df_plot.columns:
-                    df_linhas_total = df_plot.groupby(["nomeFazenda", "nome", "indexTratamentoAgrupado"], as_index=False)[
-                        "perc_Total"].mean()
-                    # Agrupa por fazenda e híbrido, tirando a média dos pares para evitar duplicatas
-                    df_linhas_total_unica = df_linhas_total.groupby(['nomeFazenda', 'nome'], as_index=False)[
-                        'perc_Total'].mean()
-                    # Pivot para garantir todas as combinações fazenda × híbrido, preenchendo ausentes com zero
-                    df_pivot_total = df_linhas_total_unica.pivot(
-                        index="nomeFazenda", columns="nome", values="perc_Total").fillna(0)
-                    df_linhas_total_completo = df_pivot_total.reset_index().melt(
-                        id_vars="nomeFazenda", var_name="nome", value_name="perc_Total")
-                    fazendas_ordem_total = sorted(
-                        df_linhas_total_completo["nomeFazenda"].unique().tolist())
-                    fig_linhas_total = px.line(
-                        df_linhas_total_completo,
-                        x="nomeFazenda",
-                        y="perc_Total",
-                        color="nome",
-                        markers=True,
-                        labels={
-                            "nomeFazenda": "Local",
-                            "perc_Total": "Total (%)",
-                            "nome": "Híbrido"
-                        },
-                        title="Perdas físicas - Total (%)",
-                        line_shape="spline"
-                    )
-                    fig_linhas_total.update_layout(
-                        xaxis=dict(
-                            categoryorder="array",
-                            categoryarray=fazendas_ordem_total,
-                            tickangle=-45,
-                            title="Local",
-                            title_font=dict(size=22, color='black'),
-                            showgrid=False,
-                            color='black',
-                            tickfont=dict(color='black'),
-                        ),
-                        yaxis=dict(
-                            title="Total (%)",
-                            title_font=dict(size=22, color='black'),
-                            showgrid=True,
-                            gridcolor='#cccccc',
-                            gridwidth=1,
-                            color='black',
-                            tickfont=dict(color='black'),
-                        ),
-                        font=dict(size=15, color='black'),
-                        legend_title_font=dict(size=15, color='black'),
-                        legend=dict(font=dict(color='black')),
-                        height=600,
-                        margin=dict(t=60, b=80, l=40, r=40),
-                        plot_bgcolor="#f5f7fa"
-                    )
-                    fig_linhas_total.update_traces(mode="lines+markers")
-                    st.plotly_chart(fig_linhas_total, use_container_width=True)
+                fig_linhas_total.update_traces(mode="lines+markers")
+                st.plotly_chart(fig_linhas_total, use_container_width=True)
 
 # =========================
 # Tabela resumo agrupada por Híbrido (nome) - Perdas Físicas

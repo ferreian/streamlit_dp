@@ -7,6 +7,61 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy.stats import gaussian_kde
 from plotly.graph_objs import Scatter
+import unicodedata
+
+# Dicionário de fazendas e funções auxiliares globais
+
+dicionario_fazendas = {
+    "FAZ. SANTA TEREZA": "BAL_1_MA",
+    "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
+    "BRAVINHOS": "CPB_MG",
+    "LOTE 17": "BAL_2_MA",
+    "FAZENDA RONCADOR": "ARN_TO",
+    "AGROMINA": "BAL_3_MA",
+    "FAZENDA CIPÓ": "BDN_TO",
+    "SANTA INÊS": "TPC_MG",
+    "SÃO TOMAZ DOURADINHO_SHG": "SHG_GO",
+    "FAZENDA VENEZA II - GRUPO UNIGGEL": "CAS_TO",
+    "CERETTA E RIGON": "CJU_MT",
+    "RANCHO 60": "QUE_1_MT",
+    "SÍTIO DOIS IRMÃOS": "CVR_MT",
+    "CAPÃO": "SGO_MS",
+    "FAZENDA ARIRANHA": "JAT_GO",
+    "FAZENDA 333": "RVD_GO",
+    "FAZENDA TORRE": "JAC_MT",
+    "FAZENDA RECANTO": "MRJ_MS",
+    "CONQUISTA": "GMO_GO",
+    "LONDRINA": "QUE_2_MT",
+    "LUIZ PAULO PENNA": "SOR_MT",
+    "FAZENDA MODELO": "ITA_MS",
+    "SANTA RITA": "VIA_GO",
+    "SANTO ANTÔNIO": "ARG_MG",
+    "MARANEY": "CHC_GO",
+    "ÁGUAS DE CHAPECÓ": "NMT_MT",
+    "FAZENDA MAISA": "DOR_MS",
+    "FAZENDA CANARINHO": "DIA_MT",
+    "FAZENDA JACIARA": "LRV_MT",
+    "LUIZ PAULO PENNA": "SCR_MT"
+}
+
+
+def padroniza_nome(nome):
+    nome = nome.strip().upper()
+    nome = unicodedata.normalize('NFKD', nome).encode(
+        'ASCII', 'ignore').decode('ASCII')
+    return nome
+
+
+dicionario_fazendas_padronizado = {padroniza_nome(
+    k): v for k, v in dicionario_fazendas.items()}
+
+
+def substitui_nome_ou_codigo(nome):
+    nome_strip = nome.strip()
+    if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
+        return nome_strip
+    return dicionario_fazendas_padronizado.get(padroniza_nome(nome_strip), nome_strip)
+
 
 # =========================
 # Header customizado do dashboard
@@ -695,6 +750,58 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     df_heatmap = df_frequencia.pivot_table(
         index='Fazenda', columns='Híbrido', values='Prod Rel (%)', aggfunc='mean'
     )
+
+    # Dicionário e funções auxiliares para este heatmap (produção relativa)
+    import unicodedata
+    dicionario_fazendas_rel = {
+        "FAZ. SANTA TEREZA": "BAL_1_MA",
+        "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
+        "BRAVINHOS": "CPB_MG",
+        "LOTE 17": "BAL_2_MA",
+        "FAZENDA RONCADOR": "ARN_TO",
+        "AGROMINA": "BAL_3_MA",
+        "FAZENDA CIPÓ": "BDN_TO",
+        "SANTA INÊS": "TPC_MG",
+        "SÃO TOMAZ DOURADINHO_SHG": "SHG_GO",
+        "FAZENDA VENEZA II - GRUPO UNIGGEL": "CAS_TO",
+        "CERETTA E RIGON": "CJU_MT",
+        "RANCHO 60": "QUE_1_MT",
+        "SÍTIO DOIS IRMÃOS": "CVR_MT",
+        "CAPÃO": "SGO_MS",
+        "FAZENDA ARIRANHA": "JAT_GO",
+        "FAZENDA 333": "RVD_GO",
+        "FAZENDA TORRE": "JAC_MT",
+        "FAZENDA RECANTO": "MRJ_MS",
+        "CONQUISTA": "GMO_GO",
+        "LONDRINA": "QUE_2_MT",
+        "LUIZ PAULO PENNA": "SOR_MT",
+        "FAZENDA MODELO": "ITA_MS",
+        "SANTA RITA": "VIA_GO",
+        "SANTO ANTÔNIO": "ARG_MG",
+        "MARANEY": "CHC_GO",
+        "ÁGUAS DE CHAPECÓ": "NMT_MT",
+        "FAZENDA MAISA": "DOR_MS",
+        "FAZENDA CANARINHO": "DIA_MT",
+        "FAZENDA JACIARA": "LRV_MT",
+        "LUIZ PAULO PENNA": "SCR_MT"
+    }
+
+    def padroniza_nome_rel(nome):
+        nome = nome.strip().upper()
+        nome = unicodedata.normalize('NFKD', nome).encode(
+            'ASCII', 'ignore').decode('ASCII')
+        return nome
+    dicionario_fazendas_rel_padronizado = {padroniza_nome_rel(
+        k): v for k, v in dicionario_fazendas_rel.items()}
+
+    def substitui_nome_ou_codigo_rel(nome):
+        nome_strip = nome.strip()
+        if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
+            return nome_strip
+        return dicionario_fazendas_rel_padronizado.get(padroniza_nome_rel(nome_strip), nome_strip)
+    df_heatmap.index = [substitui_nome_ou_codigo_rel(
+        nome) for nome in df_heatmap.index]
+
     # Escala customizada fornecida pelo usuário
     escala_de_cores = [
         (0.00, "lightcoral"),
@@ -748,6 +855,8 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         df_frequencia_visualizacao = df_frequencia_visualizacao.drop(columns=[
                                                                      'fazendaRef'])
 
+    # Removido o debug das colunas do heatmap (nomes dos híbridos)
+
 # =========================
 # Tabela de Frequência de Resposta
 # =========================
@@ -769,14 +878,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Debug: verifica o estado das variáveis
-st.write(
-    f"Debug - df_frequencia_visualizacao é None: {df_frequencia_visualizacao is None}")
-if df_frequencia_visualizacao is not None:
-    st.write(
-        f"Debug - df_frequencia_visualizacao está vazio: {df_frequencia_visualizacao.empty}")
-    st.write(
-        f"Debug - Colunas disponíveis: {list(df_frequencia_visualizacao.columns)}")
 
 if df_frequencia_visualizacao is not None and not df_frequencia_visualizacao.empty:
     gb_freq = GridOptionsBuilder.from_dataframe(df_frequencia_visualizacao)
@@ -868,6 +969,57 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     df_heatmap_ranking = df_frequencia.pivot_table(
         index='Fazenda', columns='Híbrido', values='Ranking', aggfunc='min'
     )
+    # Dicionário e funções auxiliares para este heatmap (ranking)
+    import unicodedata
+    dicionario_fazendas_rank = {
+        "FAZ. SANTA TEREZA": "BAL_1_MA",
+        "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
+        "BRAVINHOS": "CPB_MG",
+        "LOTE 17": "BAL_2_MA",
+        "FAZENDA RONCADOR": "ARN_TO",
+        "AGROMINA": "BAL_3_MA",
+        "FAZENDA CIPÓ": "BDN_TO",
+        "SANTA INÊS": "TPC_MG",
+        "SÃO TOMAZ DOURADINHO_SHG": "SHG_GO",
+        "FAZENDA VENEZA II - GRUPO UNIGGEL": "CAS_TO",
+        "CERETTA E RIGON": "CJU_MT",
+        "RANCHO 60": "QUE_1_MT",
+        "SÍTIO DOIS IRMÃOS": "CVR_MT",
+        "CAPÃO": "SGO_MS",
+        "FAZENDA ARIRANHA": "JAT_GO",
+        "FAZENDA 333": "RVD_GO",
+        "FAZENDA TORRE": "JAC_MT",
+        "FAZENDA RECANTO": "MRJ_MS",
+        "CONQUISTA": "GMO_GO",
+        "LONDRINA": "QUE_2_MT",
+        "LUIZ PAULO PENNA": "SOR_MT",
+        "FAZENDA MODELO": "ITA_MS",
+        "SANTA RITA": "VIA_GO",
+        "SANTO ANTÔNIO": "ARG_MG",
+        "MARANEY": "CHC_GO",
+        "ÁGUAS DE CHAPECÓ": "NMT_MT",
+        "FAZENDA MAISA": "DOR_MS",
+        "FAZENDA CANARINHO": "DIA_MT",
+        "FAZENDA JACIARA": "LRV_MT",
+        "LUIZ PAULO PENNA": "SCR_MT"
+    }
+
+    def padroniza_nome_rank(nome):
+        nome = nome.strip().upper()
+        nome = unicodedata.normalize('NFKD', nome).encode(
+            'ASCII', 'ignore').decode('ASCII')
+        return nome
+    dicionario_fazendas_rank_padronizado = {padroniza_nome_rank(
+        k): v for k, v in dicionario_fazendas_rank.items()}
+
+    def substitui_nome_ou_codigo_rank(nome):
+        nome_strip = nome.strip()
+        if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
+            return nome_strip
+        return dicionario_fazendas_rank_padronizado.get(padroniza_nome_rank(nome_strip), nome_strip)
+    df_heatmap_ranking.index = [substitui_nome_ou_codigo_rank(
+        nome) for nome in df_heatmap_ranking.index]
+
     escala_verde = [
         (0.0, "#006400"),
         (0.5, "#66CDAA"),
@@ -878,7 +1030,9 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
     # Mínimo 500px, 25px por fazenda
     altura_dinamica_ranking = max(500, num_fazendas_ranking * 25)
 
-    df_heatmap_ranking = df_heatmap_ranking.fillna("-")
+    # Removido o preenchimento de NaN com string para evitar erro de tipo
+    # df_heatmap_ranking = df_heatmap_ranking.fillna("-")
+
     fig = px.imshow(
         df_heatmap_ranking,
         text_auto=True,
@@ -886,9 +1040,7 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         aspect="auto",
         labels=dict(x="Híbrido", y="Fazenda", color="Ranking")
     )
-    # Garante que o eixo X (Ranking) vá de 1 a 22
-    fig.update_xaxes(type='category', categoryorder='array',
-                     categoryarray=list(range(1, 23)))
+
     fig.update_layout(
         xaxis_title="Híbrido",
         yaxis_title="Fazenda",
