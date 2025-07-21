@@ -532,6 +532,102 @@ if doencas_selecionadas:
 else:
     st.info("Selecione ao menos uma doença para visualizar a conjunta.")
 
+# ===== Resumo Estatístico de Grãos Ardidos por Híbrido =====
+df_graos_ardidos = df_analise_sanidade.copy()
+
+# Defina aqui o limiar para considerar incidência de grãos ardidos (> limiar)
+# Basta alterar este valor para mudar o critério de incidência
+# Exemplo: 0 para contar qualquer valor > 0, 6 para > 6%
+LIMIAR_INCIDENCIA_GRAOS_ARDIDOS = 0
+
+# Verifica se a coluna grãos ardidos existe
+if "graosArdidos" in df_graos_ardidos.columns:
+    # 📊 Estatísticas principais para grãos ardidos
+    resumo = df_graos_ardidos.groupby("nome").agg(
+        graos_ardidos_mean=("graosArdidos", "mean"),
+        graos_ardidos_min=("graosArdidos", "min"),
+        graos_ardidos_max=("graosArdidos", "max"),
+    ).round(1).reset_index()
+
+    df_resumo_graos = resumo.copy()
+
+    # ➕ Incidência % para grãos ardidos (valores > LIMIAR_INCIDENCIA_GRAOS_ARDIDOS)
+    total_graos = df_graos_ardidos.groupby("nome")["graosArdidos"].count()
+    acima_limiar = df_graos_ardidos[df_graos_ardidos["graosArdidos"] >
+                                    LIMIAR_INCIDENCIA_GRAOS_ARDIDOS].groupby("nome")["graosArdidos"].count()
+    incidencia_graos = ((acima_limiar / total_graos) *
+                        100).round(1).reindex(total_graos.index).fillna(0)
+    df_resumo_graos["graos_ardidos_inc_per"] = df_resumo_graos["nome"].map(
+        incidencia_graos)
+
+    # Preparação das colunas para exibição
+    colunas_exibir = [
+        "nome",
+        "graos_ardidos_mean",
+        "graos_ardidos_min",
+        "graos_ardidos_max",
+        "graos_ardidos_inc_per"
+    ]
+    # Renomear colunas para nomes mais legíveis
+    rename_dict = {
+        "nome": "Híbrido",
+        "graos_ardidos_mean": "ARD média",
+        "graos_ardidos_min": "ARD min",
+        "graos_ardidos_max": "ARD max",
+        "graos_ardidos_inc_per": "ARD inc (%)"
+    }
+    # Filtrar colunas existentes e renomear
+    colunas_exibir = [
+        col for col in colunas_exibir if col in df_resumo_graos.columns]
+    df_resumo_aggrid = df_resumo_graos[colunas_exibir].rename(
+        columns=rename_dict)
+
+    # Exibição da tabela
+    gb = GridOptionsBuilder.from_dataframe(df_resumo_aggrid)
+    gb.configure_default_column(cellStyle={'fontSize': '12px'})
+    gb.configure_grid_options(headerHeight=30)
+    for col in df_resumo_aggrid.columns:
+        gb.configure_column(
+            col,
+            headerClass='ag-header-bold',
+            menuTabs=['generalMenuTab', 'filterMenuTab', 'columnsMenuTab']
+        )
+    custom_css = {
+        ".ag-header-cell-label": {"font-weight": "bold", "font-size": "12px", "color": "black"},
+        ".ag-cell": {"color": "black", "font-size": "12px"}
+    }
+    # Cabeçalho estilizado
+    st.markdown(f"""
+        <div style="background-color: #e7f0fa; border-left: 6px solid #0070C0; padding: 12px 18px; margin-bottom: 12px; border-radius: 6px; font-size: 1.15em; color: #22223b; font-weight: 600;">
+            Análise de Grãos Ardidos por Híbrido
+        </div>
+    """, unsafe_allow_html=True)
+    # Tabela interativa
+    AgGrid(df_resumo_aggrid, gridOptions=gb.build(), height=400,
+           custom_css=custom_css, use_container_width=True)
+    # Legenda explicativa
+    st.markdown(
+        f"""
+        <div style='margin-top: 12px; font-size: 1em; color: #444;'>
+            <b>Legenda:</b> <b>ARD inc (%)</b>: Porcentagem de casos com grãos ardidos acima do limiar definido (maior valor = pior desempenho).<br>
+            <b>Limiar atual:</b> {LIMIAR_INCIDENCIA_GRAOS_ARDIDOS}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    # Botão para exportar em Excel
+    buffer_resumo = io.BytesIO()
+    with pd.ExcelWriter(buffer_resumo, engine="xlsxwriter") as writer:
+        df_resumo_aggrid.to_excel(writer, index=False)
+    buffer_resumo.seek(0)
+    st.download_button(
+        label="⬇️ Baixar Excel (Grãos Ardidos)",
+        data=buffer_resumo.getvalue(),
+        file_name="analise_graos_ardidos.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+else:
+    st.error("Coluna 'graosArdidos' não encontrada no dataset.")
 # Gráfico de Grãos Ardidos (%) por Híbrido
 
 df_graos_ardidos = df_analise_sanidade.groupby("nome", as_index=False)[
