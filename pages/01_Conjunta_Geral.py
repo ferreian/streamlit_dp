@@ -501,6 +501,18 @@ AgGrid(
     custom_css=custom_css
 )
 
+# Botão para exportar em Excel o DataFrame de resumo por híbrido
+buffer_resumo_hibrido = io.BytesIO()
+df_resumo_hibrido.to_excel(buffer_resumo_hibrido,
+                           index=False, engine='xlsxwriter')  # type: ignore
+buffer_resumo_hibrido.seek(0)
+st.download_button(
+    label="⬇️ Baixar Excel (Resumo por Híbrido)",
+    data=buffer_resumo_hibrido,
+    file_name="resumo_por_hibrido.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
+
 # =========================
 # Estatísticas descritivas para variáveis selecionadas (FIM DA PÁGINA)
 # =========================
