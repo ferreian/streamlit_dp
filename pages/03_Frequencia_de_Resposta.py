@@ -783,7 +783,9 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         "FAZENDA MAISA": "DOR_MS",
         "FAZENDA CANARINHO": "DIA_MT",
         "FAZENDA JACIARA": "LRV_MT",
-        "LUIZ PAULO PENNA": "SCR_MT"
+        "LUIZ PAULO PENNA": "SCR_MT",
+        "FAZENDA PAGANINI (TATI - MILHO)": "CSV_PR",
+        "SÍTIO SÃO JOSÉ (MILHO - TATI)": "CMB_PR"
     }
 
     def padroniza_nome_rel(nome):
@@ -1001,7 +1003,9 @@ if isinstance(df_frequencia, pd.DataFrame) and not df_frequencia.empty and all(c
         "FAZENDA MAISA": "DOR_MS",
         "FAZENDA CANARINHO": "DIA_MT",
         "FAZENDA JACIARA": "LRV_MT",
-        "LUIZ PAULO PENNA": "SCR_MT"
+        "LUIZ PAULO PENNA": "SCR_MT",
+        "FAZENDA PAGANINI (TATI - MILHO)": "CSV_PR",
+        "SÍTIO SÃO JOSÉ (MILHO - TATI)": "CMB_PR"
     }
 
     def padroniza_nome_rank(nome):

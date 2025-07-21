@@ -23,6 +23,7 @@ def agrupa_index(idx):
         return pares[idx]
     return idx
 
+
 dicionario_fazendas_linhas = {
     "FAZ. SANTA TEREZA": "BAL_1_MA",
     "CACHOEIRA DE MONTIVIDIU": "MTV_GO",
@@ -53,18 +54,29 @@ dicionario_fazendas_linhas = {
     "FAZENDA MAISA": "DOR_MS",
     "FAZENDA CANARINHO": "DIA_MT",
     "FAZENDA JACIARA": "LRV_MT",
-    "LUIZ PAULO PENNA": "SCR_MT"
+    "LUIZ PAULO PENNA": "SCR_MT",
+    "FAZENDA PAGANINI (TATI - MILHO)": "CSV_PR",
+    "SÍTIO SÃO JOSÉ (MILHO - TATI)": "CMB_PR"
 }
+
+
 def padroniza_nome_linha(nome):
     nome = nome.strip().upper()
-    nome = unicodedata.normalize('NFKD', nome).encode('ASCII', 'ignore').decode('ASCII')
+    nome = unicodedata.normalize('NFKD', nome).encode(
+        'ASCII', 'ignore').decode('ASCII')
     return nome
-dicionario_fazendas_linhas_padronizado = {padroniza_nome_linha(k): v for k, v in dicionario_fazendas_linhas.items()}
+
+
+dicionario_fazendas_linhas_padronizado = {padroniza_nome_linha(
+    k): v for k, v in dicionario_fazendas_linhas.items()}
+
+
 def substitui_nome_ou_codigo_linha(nome):
     nome_strip = nome.strip()
     if '_' in nome_strip and nome_strip[-3:] in ["_GO", "_MS", "_MT", "_MA", "_TO", "_MG"]:
         return nome_strip
     return dicionario_fazendas_linhas_padronizado.get(padroniza_nome_linha(nome_strip), nome_strip)
+
 
 # =========================
 # Header customizado do dashboard

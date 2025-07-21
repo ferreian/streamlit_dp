@@ -1,3 +1,4 @@
+from data_processing_densidade.codigo_tratamento_densidade import gerar_df_avTratamentoMilhoDensidade
 from data_processing.codigo_tratamento import gerar_df_avTratamentoMilho
 from supabase import create_client
 import io
@@ -119,6 +120,15 @@ if "df_avTratamentoMilho" not in st.session_state:
     st.session_state["df_av3TratamentoMilho_merged"] = df_av3TratamentoMilho_merged
     st.session_state["df_av4TratamentoMilho_merged"] = df_av4TratamentoMilho_merged
 
+# Após o carregamento do tratamento principal:
+if "df_avTratamentoMilhoDensidade" not in st.session_state:
+    df_final_dens, df_av2_dens, df_av3_dens, df_av4_dens = gerar_df_avTratamentoMilhoDensidade(
+        st.session_state)
+    st.session_state["df_avTratamentoMilhoDensidade"] = df_final_dens
+    st.session_state["df_av2TratamentoMilho_merged_densidade"] = df_av2_dens
+    st.session_state["df_av3TratamentoMilho_merged_densidade"] = df_av3_dens
+    st.session_state["df_av4TratamentoMilho_merged_densidade"] = df_av4_dens
+
 # Exemplo de uso do DataFrame tratado na página principal
 # st.title("Bem-vindo ao Analisador de Dados de Milho")
 # st.write("DataFrame tratado disponível para todas as páginas:")
@@ -155,6 +165,15 @@ with st.sidebar:
         dataframes[nome_df_excel] = carregar_excel(CAMINHO_EXCEL)
         st.session_state["dataframes"] = dataframes
         st.success("✅ Dados carregados e armazenados!")
+
+        # Após atualizar os DataFrames principais no session_state, adicione:
+        df_final_dens, df_av2_dens, df_av3_dens, df_av4_dens = gerar_df_avTratamentoMilhoDensidade(
+            st.session_state)
+        st.session_state["df_avTratamentoMilhoDensidade"] = df_final_dens
+        st.session_state["df_av2TratamentoMilho_merged_densidade"] = df_av2_dens
+        st.session_state["df_av3TratamentoMilho_merged_densidade"] = df_av3_dens
+        st.session_state["df_av4TratamentoMilho_merged_densidade"] = df_av4_dens
+
     if st.button("♻️ Carregar Dados sem cache (mais lento)"):
         start_time = time.time()
 
