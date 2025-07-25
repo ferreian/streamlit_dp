@@ -390,11 +390,11 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
     # Análise Head to Head (H2H) detalhada conforme solicitado
     # =========================
     # DEBUG: Verificar df_analise_h2h antes da análise H2H
-    try:
-        st.write('df_analise_h2h head:', df_analise_h2h.head())
-        st.write('df_analise_h2h shape:', df_analise_h2h.shape)
-    except Exception as e:
-        st.warning(f'df_analise_h2h não está definido: {e}')
+    # try:
+    # st.write('df_analise_h2h head:', df_analise_h2h.head())
+    # st.write('df_analise_h2h shape:', df_analise_h2h.shape)
+    # except Exception as e:
+    # st.warning(f'df_analise_h2h não está definido: {e}')
     if 'df_analise_h2h' not in locals() or df_analise_h2h is None or df_analise_h2h.empty:
         st.error('df_analise_h2h está vazio ou não foi criado corretamente!')
 
