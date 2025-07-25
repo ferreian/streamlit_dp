@@ -950,7 +950,7 @@ st.markdown(
         color: #22223b;
         font-weight: 600;
     ">
-        Visualização customizada da demanda filtrada
+        Dados Conjuntos para Análise Head to Head
     </div>
     """,
     unsafe_allow_html=True
