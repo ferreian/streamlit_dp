@@ -311,18 +311,18 @@ else:
     st.warning('Coluna indexTratamento não encontrada no DataFrame.')
 
 # Agrupa por fazendaRef e indexTratamentoAgrupado, calculando a média das colunas desejadas
-if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratamento', 'nomeFazenda', 'nome', 'humidade', 'numPlantas_ha', 'prod_sc_ha_corr']):
-    colunas_agrupamento = ['fazendaRef', 'indexTratamento']
+if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratamentoAgrupado', 'nomeFazenda', 'nome', 'humidade', 'numPlantas_ha', 'prod_sc_ha_corr']):
+    colunas_agrupamento = ['fazendaRef', 'indexTratamentoAgrupado']
     colunas_agrupar = ['humidade', 'numPlantas_ha', 'prod_sc_ha_corr']
     df_agrupado = (
         df_analise_conjunta
-        .groupby(['fazendaRef', 'indexTratamento'], as_index=False)[colunas_agrupar]
+        .groupby(['fazendaRef', 'indexTratamentoAgrupado'], as_index=False)[colunas_agrupar]
         .mean()
     )
-    # Recupera o nome do híbrido e nomeFazenda para cada par (fazendaRef, indexTratamento)
+    # Recupera o nome do híbrido e nomeFazenda para cada par (fazendaRef, indexTratamentoAgrupado)
     df_nome = (
         df_analise_conjunta
-        .groupby(['fazendaRef', 'indexTratamento'])[['nome', 'nomeFazenda']]
+        .groupby(['fazendaRef', 'indexTratamentoAgrupado'])[['nome', 'nomeFazenda']]
         .first()
         .reset_index()
     )
@@ -330,14 +330,15 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
     df_agrupado = pd.merge(
         df_agrupado,
         df_nome,
-        on=['fazendaRef', 'indexTratamento'],
+        on=['fazendaRef', 'indexTratamentoAgrupado'],
         how='left'
     )
     # Reordena as colunas
-    colunas_final = ['fazendaRef', 'nomeFazenda', 'indexTratamento',
+    colunas_final = ['fazendaRef', 'nomeFazenda', 'indexTratamentoAgrupado',
                      'nome', 'humidade', 'numPlantas_ha', 'prod_sc_ha_corr']
     df_agrupado = df_agrupado[[
         c for c in colunas_final if c in df_agrupado.columns]]
+
     # Visualização com AgGrid
     # st.subheader('Tabela Agrupada por Fazenda e Híbrido')
     # if not isinstance(df_agrupado, pd.DataFrame):
@@ -388,17 +389,26 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
     # =========================
     # Análise Head to Head (H2H) detalhada conforme solicitado
     # =========================
+    # DEBUG: Verificar df_analise_h2h antes da análise H2H
+    try:
+        st.write('df_analise_h2h head:', df_analise_h2h.head())
+        st.write('df_analise_h2h shape:', df_analise_h2h.shape)
+    except Exception as e:
+        st.warning(f'df_analise_h2h não está definido: {e}')
+    if 'df_analise_h2h' not in locals() or df_analise_h2h is None or df_analise_h2h.empty:
+        st.error('df_analise_h2h está vazio ou não foi criado corretamente!')
+
     if st.session_state.get('run_h2h', False):
         resultados_h2h = []
-        hibridos = pd.Series(df_agrupado['nome']).dropna().unique()
-        locais = pd.Series(df_agrupado['fazendaRef']).dropna().unique()
+        hibridos = pd.Series(df_analise_h2h['nome']).dropna().unique()
+        locais = pd.Series(df_analise_h2h['fazendaRef']).dropna().unique()
         for head, check in product(hibridos, repeat=2):
             if head != check:
                 for local in locais:
-                    row_head = df_agrupado[(df_agrupado['nome'] == head) & (
-                        df_agrupado['fazendaRef'] == local)]
-                    row_check = df_agrupado[(df_agrupado['nome'] == check) & (
-                        df_agrupado['fazendaRef'] == local)]
+                    row_head = df_analise_h2h[(df_analise_h2h['nome'] == head) & (
+                        df_analise_h2h['fazendaRef'] == local)]
+                    row_check = df_analise_h2h[(df_analise_h2h['nome'] == check) & (
+                        df_analise_h2h['fazendaRef'] == local)]
                     if not isinstance(row_head, pd.DataFrame):
                         row_head = pd.DataFrame(row_head)
                     if not isinstance(row_check, pd.DataFrame):
