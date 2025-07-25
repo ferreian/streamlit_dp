@@ -932,7 +932,7 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
                             "FAZENDA RECANTO": "MRJ_MS",
                             "CONQUISTA": "GMO_GO",
                             "LONDRINA": "QUE_2_MT",
-                            "LUIZ PAULO PENNA": "SOR_MT",
+                            "LUIZ PAULO PENNA": "SOR_1_MT",
                             "FAZENDA MODELO": "ITA_MS",
                             "SANTA RITA": "VIA_GO",
                             "SANTO ANTÔNIO": "ARG_MG",
@@ -943,7 +943,8 @@ if all(col in df_analise_conjunta.columns for col in ['fazendaRef', 'indexTratam
                             "FAZENDA JACIARA": "LRV_MT",
                             "LUIZ PAULO PENNA": "SCR_MT",
                             "FAZENDA PAGANINI (TATI - MILHO)": "CSV_PR",
-                            "SÍTIO SÃO JOSÉ (MILHO - TATI)": "CMB_PR"
+                            "SÍTIO SÃO JOSÉ (MILHO - TATI)": "CMB_PR",
+                            "FS": "SOR_2_MT"
                         }
 
                         def padroniza_nome_local(nome):
