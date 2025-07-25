@@ -52,10 +52,10 @@ st.markdown(
     ">
         <div style="flex:1">
             <h1 style="margin-bottom: 0.2em; color: #fff; font-size: 2.2em; font-weight: 700;">
-                Análise Comercial - Resultados, Fazendas e Usuários
+                Análise Comercial - Geração de Demanda (análise Head to Head)
             </h1>
             <h3 style="margin-top: 0; color: #e0e0e0; font-weight: 400; font-size: 1.2em;">
-                Visualize e explore as bases comerciais carregadas do Supabase.
+                Visualize e explore os dados de demanda gerados pela análise Head to Head.
             </h3>
         </div>
         <!-- Se quiser adicionar um logo, descomente a linha abaixo e coloque o caminho correto -->
@@ -894,10 +894,10 @@ if df_comercial is not None and not df_comercial.empty:
             if selecionadas:
                 df_filtrado = df_filtrado[df_filtrado[col].isin(
                     selecionadas)]
-    #st.markdown("### Resultados GD Milho")
-    #st.markdown(
-        #"""
-    #<div style="
+    # st.markdown("### Resultados GD Milho")
+    # st.markdown(
+        # """
+    # <div style="
     #    background-color: #e7f0fa;
     #    border-left: 6px solid #0070C0;
     #    padding: 12px 18px;
@@ -906,25 +906,25 @@ if df_comercial is not None and not df_comercial.empty:
     #    font-size: 1.15em;
     #    color: #22223b;
     #    font-weight: 600;
-    #">
-    #    GD Milho - Completo  (todos os anos, sem outliers)  
-    #</div>
-    #""",
-        #unsafe_allow_html=True
-    #)
-    #st.dataframe(df_filtrado, use_container_width=True)
-    #buffer_filtrado = io.BytesIO()
-    #df_filtrado.to_excel(buffer_filtrado, index=False)
-    #buffer_filtrado.seek(0)
-    #st.download_button(
+    # ">
+    #    GD Milho - Completo  (todos os anos, sem outliers)
+    # </div>
+    # """,
+        # unsafe_allow_html=True
+    # )
+    # st.dataframe(df_filtrado, use_container_width=True)
+    # buffer_filtrado = io.BytesIO()
+    # df_filtrado.to_excel(buffer_filtrado, index=False)
+    # buffer_filtrado.seek(0)
+    # st.download_button(
     #    label="⬇️ Baixar Excel (df_filtrado)",
     #    data=buffer_filtrado,
     #    file_name="df_filtrado.xlsx",
     #    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     #    key="download_df_filtrado"
-    #)
-#else:
-    #st.info("df_comercial não gerado ou está vazio para aplicar filtros.")
+    # )
+# else:
+    # st.info("df_comercial não gerado ou está vazio para aplicar filtros.")
 # --- FIM FILTRO SIDEBAR DF_FILTRADO ---
 
 # --- INÍCIO CRIAÇÃO DF_ANALISE_H2H ---
