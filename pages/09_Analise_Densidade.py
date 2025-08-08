@@ -577,7 +577,7 @@ with st.expander("📊 Box Plot - Densidades até 50.000 plantas/ha", expanded=F
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades até 50.000 plantas/ha<br><sub>N = {len(df_filtrado_50000)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades até 50.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': '#22223b'}
@@ -738,7 +738,7 @@ with st.expander("📊 Box Plot - Densidades entre 50.000 e 57.000 plantas/ha", 
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 50.000 e 57.000 plantas/ha<br><sub>N = {len(df_filtrado_50000_57000)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 50.000 e 57.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': '#22223b'}
@@ -900,7 +900,7 @@ with st.expander("📊 Box Plot - Densidades entre 57.000 e 65.000 plantas/ha", 
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 57.000 e 65.000 plantas/ha<br><sub>N = {len(df_filtrado_57000_65000)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 57.000 e 65.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': '#22223b'}
@@ -1062,7 +1062,7 @@ with st.expander("📊 Box Plot - Densidades entre 65.000 e 74.000 plantas/ha", 
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 65.000 e 74.000 plantas/ha<br><sub>N = {len(df_filtrado_65000_74000)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades entre 65.000 e 74.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': '#22223b'}
@@ -1223,7 +1223,7 @@ with st.expander("📊 Box Plot - Densidades maiores que 74.000 plantas/ha", exp
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades maiores que 74.000 plantas/ha<br><sub>N = {len(df_filtrado_maior_74000)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (kg/ha) - Densidades maiores que 74.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': '#22223b'}
@@ -1616,7 +1616,7 @@ with st.expander("📊 Box Plot - Densidades até 50.000 plantas/ha (Sacas/ha)",
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades até 50.000 plantas/ha<br><sub>N = {len(df_filtrado_50000_sc)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades até 50.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -1778,7 +1778,7 @@ with st.expander("📊 Box Plot - Densidades entre 50.000 e 57.000 plantas/ha (S
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 50.000 e 57.000 plantas/ha<br><sub>N = {len(df_filtrado_50000_57000_sc)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 50.000 e 57.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -1940,7 +1940,7 @@ with st.expander("📊 Box Plot - Densidades entre 57.000 e 65.000 plantas/ha (S
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 57.000 e 65.000 plantas/ha<br><sub>N = {len(df_filtrado_57000_65000_sc)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 57.000 e 65.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -2102,7 +2102,7 @@ with st.expander("📊 Box Plot - Densidades entre 65.000 e 74.000 plantas/ha (S
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 65.000 e 74.000 plantas/ha<br><sub>N = {len(df_filtrado_65000_74000_sc)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades entre 65.000 e 74.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -2263,7 +2263,7 @@ with st.expander("📊 Box Plot - Densidades maiores que 74.000 plantas/ha (Saca
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades maiores que 74.000 plantas/ha<br><sub>N = {len(df_filtrado_maior_74000_sc)} observações</sub>',
+                'text': f'Box Plot - Produção @13.5% (sc/ha) - Densidades maiores que 74.000 plantas/ha',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -2656,7 +2656,7 @@ with st.expander("📈 Gráfico de Dispersão - Produção (kg/ha) vs Populaçã
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Correlação entre Produção (kg/ha) e População de Plantas<br><sub>Coeficiente de Correlação: r = {correlacao_kg:.3f} | N = {len(df_correlacao_kg)} observações</sub>',
+                'text': f'Correlação entre Produção (kg/ha) e População de Plantas<br><sub>Coeficiente de Correlação: r = {correlacao_kg:.3f}</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -2669,7 +2669,11 @@ with st.expander("📈 Gráfico de Dispersão - Produção (kg/ha) vs Populaçã
                 title_font=dict(size=16, color='black'),
                 tickfont=dict(size=14, color='black'),
                 gridcolor='lightgray',
-                zeroline=False
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
             ),
             yaxis=dict(
                 title_font=dict(size=16, color='black'),
@@ -2692,7 +2696,7 @@ with st.expander("📈 Gráfico de Dispersão - Produção (kg/ha) vs Populaçã
         fig.add_annotation(
             x=0.98, y=0.98,
             xref='paper', yref='paper',
-            text=f"<b>Estatísticas:</b><br>Correlação: {correlacao_kg:.3f}<br>N: {len(df_correlacao_kg)}<br>R²: {correlacao_kg**2:.3f}",
+            text=f"<b>Estatísticas:</b><br>Correlação: {correlacao_kg:.3f}<br>R²: {correlacao_kg**2:.3f}",
             showarrow=False,
             font=dict(size=12, color='black'),
             bgcolor='rgba(255, 255, 255, 0.9)',
@@ -2827,7 +2831,7 @@ with st.expander("📈 Gráfico de Dispersão - Produção (sc/ha) vs Populaçã
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Correlação entre Produção (sc/ha) e População de Plantas<br><sub>Coeficiente de Correlação: r = {correlacao_sc:.3f} | N = {len(df_correlacao_sc)} observações</sub>',
+                'text': f'Correlação entre Produção (sc/ha) e População de Plantas<br><sub>Coeficiente de Correlação: r = {correlacao_sc:.3f}</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -2840,7 +2844,11 @@ with st.expander("📈 Gráfico de Dispersão - Produção (sc/ha) vs Populaçã
                 title_font=dict(size=16, color='black'),
                 tickfont=dict(size=14, color='black'),
                 gridcolor='lightgray',
-                zeroline=False
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
             ),
             yaxis=dict(
                 title_font=dict(size=16, color='black'),
@@ -2863,7 +2871,7 @@ with st.expander("📈 Gráfico de Dispersão - Produção (sc/ha) vs Populaçã
         fig.add_annotation(
             x=0.98, y=0.98,
             xref='paper', yref='paper',
-            text=f"<b>Estatísticas:</b><br>Correlação: {correlacao_sc:.3f}<br>N: {len(df_correlacao_sc)}<br>R²: {correlacao_sc**2:.3f}",
+            text=f"<b>Estatísticas:</b><br>Correlação: {correlacao_sc:.3f}<br>R²: {correlacao_sc**2:.3f}",
             showarrow=False,
             font=dict(size=12, color='black'),
             bgcolor='rgba(255, 255, 255, 0.9)',
@@ -2996,7 +3004,7 @@ with st.expander("📊 Matriz de Correlação - Variáveis de Produção e Densi
 
         fig.update_layout(
             title={
-                'text': f'Matriz de Correlação - Variáveis de Produção e Densidade<br><sub>N = {len(df_matriz_correlacao)} observações</sub>',
+                'text': f'Matriz de Correlação - Variáveis de Produção e Densidade',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -3144,7 +3152,7 @@ with st.expander("📈 Análise de Regressão Linear - Produção vs População
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Regressão Linear: Produção vs População de Plantas<br><sub>R² = {r_squared:.3f} | r = {correlacao:.3f} | N = {len(df_regressao)}</sub>',
+                'text': f'Regressão Linear: Produção vs População de Plantas<br><sub>R² = {r_squared:.3f} | r = {correlacao:.3f}</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -3157,7 +3165,11 @@ with st.expander("📈 Análise de Regressão Linear - Produção vs População
                 title_font=dict(size=16, color='black'),
                 tickfont=dict(size=14, color='black'),
                 gridcolor='lightgray',
-                zeroline=False
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
             ),
             yaxis=dict(
                 title_font=dict(size=16, color='black'),
@@ -3183,8 +3195,7 @@ with st.expander("📈 Análise de Regressão Linear - Produção vs População
             text=f"<b>Estatísticas da Regressão:</b><br>" +
                  f"Equação: y = {slope:.4f}x + {intercept:.1f}<br>" +
                  f"R²: {r_squared:.3f}<br>" +
-                 f"Correlação: {correlacao:.3f}<br>" +
-                 f"N: {len(df_regressao)}",
+                 f"Correlação: {correlacao:.3f}",
             showarrow=False,
             font=dict(size=12, color='black'),
             bgcolor='rgba(255, 255, 255, 0.9)',
@@ -3254,7 +3265,8 @@ with st.expander("📈 Análise de Regressão Linear - Produção vs População
         )
 
     else:
-        st.warning("Não há dados suficientes para análise de regressão linear.")
+        st.warning(
+            "Não há dados suficientes para criar o gráfico de pontos baseados na equação da reta.")
 
 # =========================
 # Análise de Regressão Linear - Produção (sc/ha) vs População
@@ -3336,7 +3348,7 @@ with st.expander("📈 Análise de Regressão Linear - Produção (sc/ha) vs Pop
         # Configura o layout
         fig.update_layout(
             title={
-                'text': f'Regressão Linear: Produção (sc/ha) vs População de Plantas<br><sub>R² = {r_squared:.3f} | r = {correlacao:.3f} | N = {len(df_regressao_sc)}</sub>',
+                'text': f'Regressão Linear: Produção (sc/ha) vs População de Plantas<br><sub>R² = {r_squared:.3f} | r = {correlacao:.3f}</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 18, 'color': 'black'}
@@ -3349,7 +3361,11 @@ with st.expander("📈 Análise de Regressão Linear - Produção (sc/ha) vs Pop
                 title_font=dict(size=16, color='black'),
                 tickfont=dict(size=14, color='black'),
                 gridcolor='lightgray',
-                zeroline=False
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
             ),
             yaxis=dict(
                 title_font=dict(size=16, color='black'),
@@ -3375,8 +3391,7 @@ with st.expander("📈 Análise de Regressão Linear - Produção (sc/ha) vs Pop
             text=f"<b>Estatísticas da Regressão:</b><br>" +
                  f"Equação: y = {slope:.4f}x + {intercept:.1f}<br>" +
                  f"R²: {r_squared:.3f}<br>" +
-                 f"Correlação: {correlacao:.3f}<br>" +
-                 f"N: {len(df_regressao_sc)}",
+                 f"Correlação: {correlacao:.3f}",
             showarrow=False,
             font=dict(size=12, color='black'),
             bgcolor='rgba(255, 255, 255, 0.9)',
@@ -3443,6 +3458,201 @@ with st.expander("📈 Análise de Regressão Linear - Produção (sc/ha) vs Pop
             label="⬇️ Baixar Excel (Dados para Regressão Linear - sc/ha)",
             data=buffer_regressao_sc,
             file_name="dados_regressao_linear_producao_sc_populacao.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+    # =========================
+    # Gráfico de Pontos Baseados na Equação da Reta
+    # =========================
+    st.markdown(
+        """
+        <div style="
+            background-color: #e8f5e8;
+            border-left: 6px solid #2E8B57;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            font-size: 1.15em;
+            color: #2E8B57;
+            font-weight: 600;
+        ">
+            Gráfico de Pontos Baseados na Equação da Reta - População 40.000 a 70.000
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Verifica se há dados para criar o gráfico
+    if not df_regressao.empty and not df_regressao_sc.empty:
+        # Gera pontos baseados na equação da reta
+        populacoes = [40000, 50000, 60000, 70000]
+
+        # Calcula coeficientes para kg/ha (usando dados da primeira regressão)
+        x_kg = df_regressao['numPlantas_ha'].values
+        y_kg = df_regressao['prod_kg_ha_corr'].values
+        coeffs_kg = np.polyfit(x_kg, y_kg, 1)
+        slope_kg = coeffs_kg[0]
+        intercept_kg = coeffs_kg[1]
+
+        # Calcula coeficientes para sc/ha (usando dados da segunda regressão)
+        x_sc = df_regressao_sc['numPlantas_ha'].values
+        y_sc = df_regressao_sc['prod_sc_ha_corr'].values
+        coeffs_sc = np.polyfit(x_sc, y_sc, 1)
+        slope_sc = coeffs_sc[0]
+        intercept_sc = coeffs_sc[1]
+
+        producoes_kg = [slope_kg * pop + intercept_kg for pop in populacoes]
+        producoes_sc = [slope_sc * pop + intercept_sc for pop in populacoes]
+
+        # Cria o gráfico para kg/ha
+        fig_pontos_kg = go.Figure()
+
+        # Adiciona linha baseada na equação
+        fig_pontos_kg.add_trace(go.Scatter(
+            x=populacoes,
+            y=producoes_kg,
+            mode='lines',
+            name='Linha da Equação',
+            line=dict(color='#0070C0', width=3),
+            hovertemplate='<b>População:</b> %{x:,.0f} plantas/ha<br>' +
+            '<b>Produção Estimada:</b> %{y:,.1f} kg/ha<br>' +
+            '<extra></extra>'
+        ))
+
+        # Configura o layout
+        fig_pontos_kg.update_layout(
+            title={
+                'text': f'Pontos Baseados na Equação da Reta (kg/ha)<br><sub>Equação: y = {slope_kg:.4f}x + {intercept_kg:.1f}</sub>',
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 18, 'color': 'black'}
+            },
+            xaxis_title='População de Plantas (plantas/ha)',
+            yaxis_title='Produção Estimada @13.5% (kg/ha)',
+            plot_bgcolor='#f5f7fa',
+            paper_bgcolor='white',
+            xaxis=dict(
+                title_font=dict(size=16, color='black'),
+                tickfont=dict(size=14, color='black'),
+                gridcolor='lightgray',
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
+            ),
+            yaxis=dict(
+                title_font=dict(size=16, color='black'),
+                tickfont=dict(size=14, color='black'),
+                gridcolor='lightgray',
+                zeroline=False
+            ),
+            showlegend=True,
+            legend=dict(
+                x=0.02, y=0.98,
+                bgcolor='rgba(255, 255, 255, 0.8)',
+                bordercolor='gray',
+                borderwidth=1
+            ),
+            height=500,
+            margin=dict(l=50, r=50, t=100, b=50)
+        )
+
+        st.plotly_chart(fig_pontos_kg, use_container_width=True)
+
+        # Cria o gráfico para sc/ha
+        fig_pontos_sc = go.Figure()
+
+        # Adiciona linha baseada na equação
+        fig_pontos_sc.add_trace(go.Scatter(
+            x=populacoes,
+            y=producoes_sc,
+            mode='lines',
+            name='Linha da Equação',
+            line=dict(color='#0070C0', width=3),
+            hovertemplate='<b>População:</b> %{x:,.0f} plantas/ha<br>' +
+            '<b>Produção Estimada:</b> %{y:,.1f} sc/ha<br>' +
+            '<extra></extra>'
+        ))
+
+        # Configura o layout
+        fig_pontos_sc.update_layout(
+            title={
+                'text': f'Pontos Baseados na Equação da Reta (sc/ha)<br><sub>Equação: y = {slope_sc:.4f}x + {intercept_sc:.1f}</sub>',
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 18, 'color': 'black'}
+            },
+            xaxis_title='População de Plantas (plantas/ha)',
+            yaxis_title='Produção Estimada @13.5% (sc/ha)',
+            plot_bgcolor='#f5f7fa',
+            paper_bgcolor='white',
+            xaxis=dict(
+                title_font=dict(size=16, color='black'),
+                tickfont=dict(size=14, color='black'),
+                gridcolor='lightgray',
+                zeroline=False,
+                tickmode='array',
+                tickvals=[40000, 50000, 60000, 70000],
+                ticktext=['40.000', '50.000', '60.000', '70.000'],
+                range=[40000, 70000]
+            ),
+            yaxis=dict(
+                title_font=dict(size=16, color='black'),
+                tickfont=dict(size=14, color='black'),
+                gridcolor='lightgray',
+                zeroline=False
+            ),
+            showlegend=True,
+            legend=dict(
+                x=0.02, y=0.98,
+                bgcolor='rgba(255, 255, 255, 0.8)',
+                bordercolor='gray',
+                borderwidth=1
+            ),
+            height=500,
+            margin=dict(l=50, r=50, t=100, b=50)
+        )
+
+        st.plotly_chart(fig_pontos_sc, use_container_width=True)
+
+        # Tabela com os valores calculados
+        st.markdown("### Valores Estimados pela Equação da Reta")
+
+        # Cria DataFrame com os valores
+        df_pontos = pd.DataFrame({
+            'População (plantas/ha)': populacoes,
+            'Produção Estimada (kg/ha)': [f"{prod:.1f}" for prod in producoes_kg],
+            'Produção Estimada (sc/ha)': [f"{prod:.1f}" for prod in producoes_sc]
+        })
+
+        # Configuração do AgGrid para tabela de pontos
+        gb_pontos = GridOptionsBuilder.from_dataframe(df_pontos)
+        gb_pontos.configure_default_column(editable=False, groupable=True,
+                                           filter=True, resizable=True, cellStyle={'fontSize': '12px'})
+        gb_pontos.configure_grid_options(headerHeight=30)
+        grid_options_pontos = gb_pontos.build()
+
+        # Exibe tabela com AgGrid
+        AgGrid(
+            df_pontos,
+            gridOptions=grid_options_pontos,
+            enable_enterprise_modules=True,
+            fit_columns_on_grid_load=False,
+            theme="streamlit",
+            height=200,
+            reload_data=True,
+            custom_css=custom_css
+        )
+
+        # Botão para exportar dados dos pontos
+        buffer_pontos = io.BytesIO()
+        df_pontos.to_excel(buffer_pontos, index=False)
+        buffer_pontos.seek(0)
+        st.download_button(
+            label="⬇️ Baixar Excel (Pontos da Equação da Reta)",
+            data=buffer_pontos,
+            file_name="pontos_equacao_retta_producao_populacao.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 

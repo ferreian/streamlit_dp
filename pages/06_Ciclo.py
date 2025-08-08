@@ -556,3 +556,166 @@ if 'Híbrido' in df_analise_ciclo_agrupado_visualizacao.columns:
             plot_bgcolor='#f5f7fa'
         )
         st.plotly_chart(fig_scatter, use_container_width=True)
+
+# =========================
+# Gráfico de Barras: Florescimento Feminino vs Masculino por Híbrido
+# =========================
+
+if 'Híbrido' in df_analise_ciclo_agrupado_visualizacao.columns and 'Flor Fem (dias)' in df_analise_ciclo_agrupado_visualizacao.columns and 'Flor Masc (dias)' in df_analise_ciclo_agrupado_visualizacao.columns:
+
+    # Filtra dados válidos (remove zeros e nulos)
+    df_flor = df_analise_ciclo_agrupado_visualizacao[
+        (df_analise_ciclo_agrupado_visualizacao['Flor Fem (dias)'] > 0) &
+        (df_analise_ciclo_agrupado_visualizacao['Flor Masc (dias)'] > 0) &
+        (df_analise_ciclo_agrupado_visualizacao['Flor Fem (dias)'].notna()) &
+        (df_analise_ciclo_agrupado_visualizacao['Flor Masc (dias)'].notna())
+    ].copy()
+
+    if not df_flor.empty:
+        st.markdown(
+            """
+            <div style="
+                background-color: #e7f0fa;
+                border-left: 6px solid #0070C0;
+                padding: 12px 18px;
+                margin-bottom: 12px;
+                border-radius: 6px;
+                font-size: 1.15em;
+                color: #22223b;
+                font-weight: 600;
+            ">
+                Florescimento Feminino vs Masculino por Híbrido
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Agrupa por híbrido e calcula médias
+        df_flor_agrupado = df_flor.groupby('Híbrido', as_index=False).agg({
+            'Flor Fem (dias)': 'mean',
+            'Flor Masc (dias)': 'mean'
+        }).round(1)
+
+        # Ordena por florescimento feminino
+        df_flor_agrupado = df_flor_agrupado.sort_values('Flor Fem (dias)')
+
+        # Cria o gráfico de barras
+        fig_barras = go.Figure()
+
+        # Adiciona barra para Flor Fem
+        fig_barras.add_trace(go.Bar(
+            x=df_flor_agrupado['Híbrido'],
+            y=df_flor_agrupado['Flor Fem (dias)'],
+            name='Flor Fem (dias)',
+            marker_color='#0070C0',
+            text=df_flor_agrupado['Flor Fem (dias)'].round(1).astype(str),
+            textposition='outside',
+            textfont=dict(size=16, color='black'),
+            hovertemplate='<b>%{x}</b><br>' +
+                         '<b>Flor Fem:</b> %{y:.1f} dias<br>' +
+                         '<extra></extra>'
+        ))
+
+        # Adiciona barra para Flor Masc
+        fig_barras.add_trace(go.Bar(
+            x=df_flor_agrupado['Híbrido'],
+            y=df_flor_agrupado['Flor Masc (dias)'],
+            name='Flor Masc (dias)',
+            marker_color='#27ae60',
+            text=df_flor_agrupado['Flor Masc (dias)'].round(1).astype(str),
+            textposition='outside',
+            textfont=dict(size=16, color='black'),
+            hovertemplate='<b>%{x}</b><br>' +
+                         '<b>Flor Masc:</b> %{y:.1f} dias<br>' +
+                         '<extra></extra>'
+        ))
+
+        # Configura o layout
+        fig_barras.update_layout(
+            title={
+                'text': 'Florescimento Feminino vs Masculino por Híbrido<br><sub>Azul: Flor Fem | Verde: Flor Masc</sub>',
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 22, 'color': 'black'}
+            },
+            xaxis_title='Híbrido',
+            yaxis_title='Dias após Plantio',
+            plot_bgcolor='#f5f7fa',
+            paper_bgcolor='white',
+            barmode='group',  # Agrupa as barras lado a lado
+            xaxis=dict(
+                title_font=dict(size=18, color='black'),
+                tickfont=dict(size=16, color='black'),
+                gridcolor='lightgray',
+                zeroline=False,
+                tickangle=45  # Rotaciona labels para melhor visualização
+            ),
+            yaxis=dict(
+                title_font=dict(size=18, color='black'),
+                tickfont=dict(size=16, color='black'),
+                gridcolor='lightgray',
+                zeroline=False
+            ),
+            showlegend=False,  # Remove a legenda separada
+            height=700,
+            # Margem maior na parte inferior para os labels
+            margin=dict(l=50, r=50, t=100, b=250)
+        )
+
+        st.plotly_chart(fig_barras, use_container_width=True)
+
+        # Tabela com os dados do gráfico
+        st.markdown("### Dados de Florescimento por Híbrido")
+
+        # Configuração do AgGrid para tabela de florescimento
+        gb_flor = GridOptionsBuilder.from_dataframe(df_flor_agrupado)
+        gb_flor.configure_default_column(editable=False, groupable=True,
+                                         filter=True, resizable=True, cellStyle={'fontSize': '12px'})
+        gb_flor.configure_grid_options(headerHeight=30)
+        grid_options_flor = gb_flor.build()
+
+        # Exibe tabela com AgGrid
+        AgGrid(
+            df_flor_agrupado,
+            gridOptions=grid_options_flor,
+            enable_enterprise_modules=True,
+            fit_columns_on_grid_load=False,
+            theme="streamlit",
+            height=300,
+            reload_data=True,
+            custom_css=custom_css
+        )
+
+        # Botão para exportar dados do florescimento
+        buffer_flor = io.BytesIO()
+        df_flor_agrupado.to_excel(buffer_flor, index=False)
+        buffer_flor.seek(0)
+        st.download_button(
+            label="⬇️ Baixar Excel (Dados de Florescimento)",
+            data=buffer_flor,
+            file_name="florescimento_hibridos.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+        # Estatísticas resumidas
+        st.markdown("### Estatísticas de Florescimento")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            media_fem = df_flor_agrupado['Flor Fem (dias)'].mean()
+            st.metric("Média Flor Fem", f"{media_fem:.1f} dias")
+
+        with col2:
+            media_masc = df_flor_agrupado['Flor Masc (dias)'].mean()
+            st.metric("Média Flor Masc", f"{media_masc:.1f} dias")
+
+        with col3:
+            diferenca_media = media_masc - media_fem
+            st.metric("Diferença Média", f"{diferenca_media:.1f} dias")
+
+    else:
+        st.warning(
+            "Não há dados suficientes de florescimento para criar o gráfico.")
+else:
+    st.info("Para visualizar o gráfico de florescimento, certifique-se de que os dados contêm informações de Flor Fem e Flor Masc.")
